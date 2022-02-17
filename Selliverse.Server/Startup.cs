@@ -32,7 +32,7 @@
 
             app.Run(async context =>
             {
-                await context.Response.WriteAsync("The Selliverse isn't real, it cannot hurt you. vnext");
+                await context.Response.WriteAsync("The Selliverse isn't real, it cannot hurt you. v+2");
             });
         }
     }
