@@ -33,6 +33,8 @@ public class GameManager : MonoBehaviour
         public string name;
     }
 
+    public bool UseLocal = true;
+
     public GameState state;
 
     WebSocket websocket;
@@ -47,7 +49,7 @@ public class GameManager : MonoBehaviour
         nameField = GameObject.Find("NameField").GetComponent<InputField>();
         chatController = GameObject.Find("HUD").GetComponent<ChatController>();
 
-        websocket = new WebSocket("ws://localhost:5000");
+        websocket = new WebSocket(UseLocal ? "ws://localhost:5000" : "wss://selliverse.azurewebsites.net/");
         // websocketConnection = this.GetComponent<WebSocketConnection>();
         // websocketConnection = new WebSocketConnection();
         // websocketConnection.Start();
