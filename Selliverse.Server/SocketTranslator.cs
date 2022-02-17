@@ -68,6 +68,12 @@ namespace Selliverse.Server
                         Id = id,
                         Name = input["name"]
                     };
+                case "movement":
+                    return new MovementMessage()
+                    {
+                        Id = id,
+                        Position = new System.Numerics.Vector3(float.Parse(input["x"]), float.Parse(input["y"]), float.Parse(input["z"]))
+                    };
                 default:
                     return null;
             }

@@ -22,6 +22,7 @@
             this.ReceiveAsync<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
             this.ReceiveAsync<PlayerNameSetMessage>(this.HandlePlayerNameSet);
+            this.ReceiveAsync<MovementMessage>(this.HandleMovement);
         }
 
 
@@ -56,6 +57,11 @@
         private async Task HandlePlayerNameSet(PlayerNameSetMessage msg)
         {
             // todo
+        }
+
+        private async Task HandleMovement(MovementMessage msg)
+        {
+            Log.Information("Player {id} at POS: {pos}", msg.Id, msg.Position);
         }
 
     }
