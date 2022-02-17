@@ -10,7 +10,7 @@ public class WebSocketConnection : MonoBehaviour
     bool isOpen = false;
 
     // Start is called before the first frame update
-    async void Start()
+    public async void Start()
     {
         websocket = new WebSocket("ws://localhost:5000");
 
@@ -32,6 +32,14 @@ public class WebSocketConnection : MonoBehaviour
             isOpen = false ;
         };
 
+        websocket.OnMessage += (bytes) =>
+        {
+            Debug.Log("Hello got something");
+            // Reading a plain text message
+            var message = System.Text.Encoding.UTF8.GetString(bytes);
+            Debug.Log("Received OnMessage! (" + bytes.Length + " bytes) " + message);
+        };
+
 
         await websocket.Connect();
 
@@ -42,6 +50,12 @@ public class WebSocketConnection : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public void AddHandler(WebSocketMessageEventHandler handler)
+    {
+        websocket.OnMessage += handler;
+        Debug.Log("Added handler!");
     }
 
     async void OnApplicationQuit()

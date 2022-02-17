@@ -68,19 +68,32 @@ namespace Selliverse.Server.Actors
 
         private async Task HandlePlayerEnteredGame(PlayerEnteredGameMessage msg)
         {
-            this.playerStates[msg.Id].Name = msg.Name;
-            this.playerStates[msg.Id].GameState = GameState.InGame;
-            await BroadCastToOthers(msg.Id, msg);
+            Log.Information("Getting a new player entered!");
+            if (this.playerStates.Values.Any(ps => String.Equals(ps.Name, msg.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                // not allowed
+            }
+            else
+            {
+                this.playerStates[msg.Id].Name = msg.Name;
+                this.playerStates[msg.Id].GameState = GameState.InGame;
+                var body = new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(new PlayerWelcomeMessage()
+                {
+                    IsWelcome = true
+                })) ;
+                await this.playerConnections[msg.Id].SendAsync(body, WebSocketMessageType.Binary, true, CancellationToken.None);
+                await BroadCastToOthers(msg.Id, msg);
+            }
         }
 
         private void HandleMovement(MovementMessage msg)
         {
             this.throttleActor.Tell(msg);
         }
-        
+
         private void HandlePlayerListAsk(PlayerListAsk ask)
         {
-            Sender.Tell(new PlayerListResponse(){ Players = playerConnections.Keys.ToArray() });
+            Sender.Tell(new PlayerListResponse() { Players = playerConnections.Keys.ToArray() });
         }
     }
 }

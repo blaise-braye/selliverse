@@ -34,18 +34,18 @@ public class PlayerMovement : MonoBehaviour
     Vector3 velocity;
     bool isGrounded;
 
-    WebSocketConnection websocketConnection;
+    GameManager gameManager;
 
     void Start()
     {
         var game = GameObject.Find("Game");
-        websocketConnection = game.GetComponent<WebSocketConnection>();
+        gameManager = game.GetComponent<GameManager>();
         Debug.Log("Stgarting player movement");
     }
     
 
     // Update is called once per frame
-    void Update()
+    async void Update()
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         
@@ -83,7 +83,7 @@ public class PlayerMovement : MonoBehaviour
 
         var data = JsonUtility.ToJson(msg);
 
-        websocketConnection.Send(data);
+        gameManager.EmitEvent(data);
 
     }
 }

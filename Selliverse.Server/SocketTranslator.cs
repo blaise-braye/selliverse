@@ -61,7 +61,7 @@ namespace Selliverse.Server
                         Id = id,
                         Content = input["content"]
                     };
-                case "name":
+                case "enter":
                     return new PlayerEnteredGameMessage()
                     {
                         Id = id,
