@@ -15,7 +15,10 @@ namespace Selliverse.Server
 
         public SocketTranslator(ActorSystem actorSystem)
         {
-            var props = Props.Create<SvCoreActor>();
+            var throttleProps = Props.Create<SvThrottledBroadcastActor>();
+            var throttleActor = actorSystem.ActorOf(throttleProps, "svThrottle");
+
+            var props = Props.Create<SvCoreActor>(() => new SvCoreActor(throttleActor));
             this.coreActor = actorSystem.ActorOf(props, "svCore");
         }
 
