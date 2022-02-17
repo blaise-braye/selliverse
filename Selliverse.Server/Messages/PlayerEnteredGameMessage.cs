@@ -1,6 +1,6 @@
 ﻿namespace Selliverse.Server.Messages
 {
-    public class PlayerNameSetMessage
+    public class PlayerEnteredGameMessage
     {
         public string Id { get; set; }
 

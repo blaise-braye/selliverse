@@ -19,10 +19,10 @@
         
         public SvCoreActor()
         {
-            this.ReceiveAsync<PlayerJoinedMessage>(this.HandlePlayerJoined);
+            this.ReceiveAsync<PlayerConnectedMessage>(this.HandlePlayerConnected);
             this.ReceiveAsync<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
-            this.ReceiveAsync<PlayerNameSetMessage>(this.HandlePlayerNameSet);
+            this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
             this.ReceiveAsync<MovementMessage>(this.HandleMovement);
         }
 
@@ -36,7 +36,7 @@
             }
         }
 
-        private async Task HandlePlayerJoined(PlayerJoinedMessage msg)
+        private async Task HandlePlayerConnected(PlayerConnectedMessage msg)
         {
             Log.Information("New player {id}", msg.Id);
             this.playerConnections.Add(msg.Id, msg.WebSocket);
@@ -60,15 +60,19 @@
         }
 
 
-        private async Task HandlePlayerNameSet(PlayerNameSetMessage msg)
+        private async Task HandlePlayerEnteredGame(PlayerEnteredGameMessage msg)
         {
             this.playerStates[msg.Id].Name = msg.Name;
             this.playerStates[msg.Id].GameState = GameState.InGame;
+            await BroadCastToOthers(msg.Id, msg);
         }
 
         private async Task HandleMovement(MovementMessage msg)
         {
             Log.Information("Player {id} at POS: {pos}", msg.Id, msg.Position);
+
+            // push the movement to all others
+            await BroadCastToOthers(msg.Id, msg);
         }
 
     }
