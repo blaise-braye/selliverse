@@ -72,21 +72,19 @@ namespace Selliverse.Server.Actors
             if (this.playerStates.Values.Any(ps => String.Equals(ps.Name, msg.Name, StringComparison.OrdinalIgnoreCase)))
             {
                 // not allowed
-                var body = new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(new PlayerWelcomeMessage()
+                await this.playerConnections[msg.Id].SendItRight(new PlayerWelcomeMessage()
                 {
                     IsWelcome = false
-                }));
-                await this.playerConnections[msg.Id].SendAsync(body, WebSocketMessageType.Binary, true, CancellationToken.None);
+                });
             }
             else
             {
                 this.playerStates[msg.Id].Name = msg.Name;
                 this.playerStates[msg.Id].GameState = GameState.InGame;
-                var body = new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(new PlayerWelcomeMessage()
+                await this.playerConnections[msg.Id].SendItRight(new PlayerWelcomeMessage()
                 {
                     IsWelcome = true
-                })) ;
-                await this.playerConnections[msg.Id].SendAsync(body, WebSocketMessageType.Binary, true, CancellationToken.None);
+                });
                 await BroadCastToOthers(msg.Id, msg);
             }
         }

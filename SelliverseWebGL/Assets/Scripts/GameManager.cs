@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using NativeWebSocket;
+using System.Text;
 
 public enum GameState
 {
@@ -14,6 +15,16 @@ public enum GameState
 
 public class GameManager : MonoBehaviour
 {
+
+    class RootMessage
+    {
+        public string type;
+    }
+
+    class WelcomeMessage : RootMessage
+    {
+        public bool isWelcome;
+    }
 
     class EnterMessage
     {
@@ -108,6 +119,35 @@ public class GameManager : MonoBehaviour
 
     public void HandleMessage(byte[] data)
     {
-        Debug.Log("Got something from the server");
+        var json = Encoding.UTF8.GetString(data);
+    
+        var rootmsg = JsonUtility.FromJson<RootMessage>(json);
+    
+        Debug.Log("Got a '" + rootmsg.type + "' from the server");
+
+        switch (rootmsg.type)
+        {
+            case "welcome":
+                HandleWelcome(json);
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    public void HandleWelcome(string json)
+    {
+        var welcomeMsg = JsonUtility.FromJson<WelcomeMessage>(json);
+
+        if(welcomeMsg.isWelcome)
+        {
+            this.state = GameState.InGame;
+            Debug.Log("Welcome to the game!");
+        }
+        else
+        {
+            Debug.Log("Already a player with that name");
+        }
     }
 }
