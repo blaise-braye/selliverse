@@ -2,7 +2,7 @@
 {
     using System.Net.WebSockets;
 
-    public class PlayerJoinedMessage
+    public class PlayerConnectedMessage
     {
         public string Id { get; set; }
 

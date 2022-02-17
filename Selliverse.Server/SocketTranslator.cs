@@ -23,7 +23,7 @@ namespace Selliverse.Server
         {
             Log.Information("SV new player {id}", id);
 
-            this.coreActor.Tell(new PlayerJoinedMessage()
+            this.coreActor.Tell(new PlayerConnectedMessage()
             {
                 Id = id,
                 WebSocket = webSocket
@@ -63,7 +63,7 @@ namespace Selliverse.Server
                         Content = input["content"]
                     };
                 case "name":
-                    return new PlayerNameSetMessage()
+                    return new PlayerEnteredGameMessage()
                     {
                         Id = id,
                         Name = input["name"]
