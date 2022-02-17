@@ -29,7 +29,9 @@
             app.UseWebSockets(websocketOptions);
 
             app.UseMiddleware<SocketMiddleware>();
-
+            app.UseDefaultFiles();
+            app.UseStaticFiles(new StaticFileOptions());
+            
             app.Run(async context =>
             {
                 await context.Response.WriteAsync("The Selliverse isn't real, it cannot hurt you. v+2");
