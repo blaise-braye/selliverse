@@ -34,7 +34,7 @@ namespace Selliverse.Server
                 // Origins go here
             };
             app.UseWebSockets(websocketOptions);
-
+            app.UseHttpsRedirection();
             app.UseMiddleware<SocketMiddleware>();
             app.UseDefaultFiles();
             app.UseStaticFiles(new StaticFileOptions());
