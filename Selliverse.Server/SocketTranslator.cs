@@ -11,22 +11,18 @@ namespace Selliverse.Server
 {
     public class SocketTranslator
     {
-        private readonly IActorRef coreActor;
+        private IActorRef CoreActor { get; }
 
-        public SocketTranslator(ActorSystem actorSystem)
+        public SocketTranslator(IActorRef coreActor)
         {
-            var throttleProps = Props.Create<SvThrottledBroadcastActor>();
-            var throttleActor = actorSystem.ActorOf(throttleProps, "svThrottle");
-
-            var props = Props.Create<SvCoreActor>(() => new SvCoreActor(throttleActor));
-            this.coreActor = actorSystem.ActorOf(props, "svCore");
+            CoreActor = coreActor;
         }
 
         public void OnConnected(string id, WebSocket webSocket)
         {
             Log.Information("SV new player {id}", id);
 
-            this.coreActor.Tell(new PlayerConnectedMessage()
+            this.CoreActor.Tell(new PlayerConnectedMessage()
             {
                 Id = id,
                 WebSocket = webSocket
@@ -42,14 +38,14 @@ namespace Selliverse.Server
             var msg = CreateStronglyTypedMessage(payload, id);
             if (msg != null)
             {
-                this.coreActor.Tell(msg);
+                this.CoreActor.Tell(msg);
             }
         }
 
         public void OnDisconnected(string id)
         {
             Log.Information("SV lost player {id}", id);
-            this.coreActor.Tell(new PlayerLeftMessage()
+            this.CoreActor.Tell(new PlayerLeftMessage()
             {
                 Id = id
             });

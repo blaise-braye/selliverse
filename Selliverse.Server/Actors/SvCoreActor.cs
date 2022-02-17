@@ -1,4 +1,6 @@
-﻿namespace Selliverse.Server.Actors
+﻿using Selliverse.Server.MessagesAsks;
+
+namespace Selliverse.Server.Actors
 {
     using Akka.Actor;
     using Selliverse.Server.Messages;
@@ -25,6 +27,8 @@
             this.ReceiveAsync<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
+            this.ReceiveAsync<MovementMessage>(this.HandleMovement);
+            this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
             this.Receive<MovementMessage>(this.HandleMovement);
             this.throttleActor = throttleActor;
         }
@@ -74,6 +78,10 @@
         {
             this.throttleActor.Tell(msg);
         }
-
+        
+        private void HandlePlayerListAsk(PlayerListAsk ask)
+        {
+            Sender.Tell(new PlayerListResponse(){ Players = playerConnections.Keys.ToArray() });
+        }
     }
 }
