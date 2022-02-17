@@ -1,4 +1,6 @@
-﻿namespace Selliverse.Server.Actors
+﻿using Selliverse.Server.MessagesAsks;
+
+namespace Selliverse.Server.Actors
 {
     using Akka.Actor;
     using Selliverse.Server.Messages;
@@ -16,14 +18,18 @@
         private Dictionary<string, WebSocket> playerConnections = new Dictionary<string, WebSocket>();
 
         private Dictionary<string, PlayerState> playerStates = new Dictionary<string, PlayerState>();
-        
-        public SvCoreActor()
+
+        public readonly IActorRef throttleActor;
+
+        public SvCoreActor(IActorRef throttleActor)
         {
             this.ReceiveAsync<PlayerConnectedMessage>(this.HandlePlayerConnected);
             this.ReceiveAsync<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
-            this.ReceiveAsync<MovementMessage>(this.HandleMovement);
+            this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
+            this.Receive<MovementMessage>(this.HandleMovement);
+            this.throttleActor = throttleActor;
         }
 
 
@@ -67,13 +73,14 @@
             await BroadCastToOthers(msg.Id, msg);
         }
 
-        private async Task HandleMovement(MovementMessage msg)
+        private void HandleMovement(MovementMessage msg)
         {
-            Log.Information("Player {id} at POS: {pos}", msg.Id, msg.Position);
-
-            // push the movement to all others
-            await BroadCastToOthers(msg.Id, msg);
+            this.throttleActor.Tell(msg);
         }
-
+        
+        private void HandlePlayerListAsk(PlayerListAsk ask)
+        {
+            Sender.Tell(new PlayerListResponse(){ Players = playerConnections.Keys.ToArray() });
+        }
     }
 }
