@@ -13,8 +13,9 @@
 
     public class SvCoreActor : ReceiveActor
     {
-        private Dictionary<string, WebSocket> players = new Dictionary<string, WebSocket>();
+        private Dictionary<string, WebSocket> playerConnections = new Dictionary<string, WebSocket>();
 
+        private Dictionary<string, PlayerState> playerStates = new Dictionary<string, PlayerState>();
         
         public SvCoreActor()
         {
@@ -29,7 +30,7 @@
         private async Task BroadCastToOthers(string id, object message)
         {
             var body = new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(message));
-            foreach (var (_, socket) in players.Where(kvp => !kvp.Key.Equals(id, System.StringComparison.Ordinal)))
+            foreach (var (_, socket) in playerConnections.Where(kvp => !kvp.Key.Equals(id, System.StringComparison.Ordinal)))
             {
                 await socket.SendAsync(body, WebSocketMessageType.Text, true, CancellationToken.None);
             }
@@ -38,13 +39,17 @@
         private async Task HandlePlayerJoined(PlayerJoinedMessage msg)
         {
             Log.Information("New player {id}", msg.Id);
-            this.players.Add(msg.Id, msg.WebSocket);
+            this.playerConnections.Add(msg.Id, msg.WebSocket);
+            this.playerStates.Add(msg.Id, new PlayerState()
+            {
+
+            });
         }
 
         private async Task HandlePlayerLeft(PlayerLeftMessage msg)
         {
             Log.Information("Player {id} left", msg.Id);
-            this.players.Remove(msg.Id);
+            this.playerConnections.Remove(msg.Id);
         }
 
         private async Task HandleChat(ChatMessage msg)
