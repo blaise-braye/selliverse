@@ -42,7 +42,7 @@
             this.playerConnections.Add(msg.Id, msg.WebSocket);
             this.playerStates.Add(msg.Id, new PlayerState()
             {
-
+                GameState = GameState.Lobby
             });
         }
 
@@ -50,6 +50,7 @@
         {
             Log.Information("Player {id} left", msg.Id);
             this.playerConnections.Remove(msg.Id);
+            this.playerStates.Remove(msg.Id);
         }
 
         private async Task HandleChat(ChatMessage msg)
@@ -61,7 +62,8 @@
 
         private async Task HandlePlayerNameSet(PlayerNameSetMessage msg)
         {
-            // todo
+            this.playerStates[msg.Id].Name = msg.Name;
+            this.playerStates[msg.Id].GameState = GameState.InGame;
         }
 
         private async Task HandleMovement(MovementMessage msg)
