@@ -53,6 +53,8 @@
      <Compile Include="Assets\Scripts\GameManager.cs" />
      <Compile Include="Assets\WebSocket.cs" />
      <Compile Include="Assets\Scripts\WebSocketConnection.cs" />
+     <Compile Include="Assets\Scripts\HideByDefault.cs" />
+     <Compile Include="Assets\Scripts\ChatController.cs" />
      <None Include="Assets\endel.nativewebsocket.asmdef" />
  <Reference Include="UnityEngine">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.3.28f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>

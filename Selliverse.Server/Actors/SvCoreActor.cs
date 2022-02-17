@@ -35,10 +35,17 @@ namespace Selliverse.Server.Actors
 
         private async Task BroadCastToOthers(string id, object message)
         {
-            var body = new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(message));
             foreach (var (_, socket) in playerConnections.Where(kvp => !kvp.Key.Equals(id, System.StringComparison.Ordinal)))
             {
-                await socket.SendAsync(body, WebSocketMessageType.Text, true, CancellationToken.None);
+                await socket.SendItRight(message);
+            }
+        }
+
+        private async Task BroadCastToAll(string id, object message)
+        {   
+            foreach (var (_, socket) in playerConnections)
+            {
+                await socket.SendItRight(message);
             }
         }
 
@@ -62,7 +69,17 @@ namespace Selliverse.Server.Actors
         private async Task HandleChat(ChatMessage msg)
         {
             Log.Information("{id}: {content}", msg.Id, msg.Content);
-            await BroadCastToOthers(msg.Id, msg);
+            // look up the name
+            if(this.playerStates.TryGetValue(msg.Id, out var sender))
+            {
+                await BroadCastToAll(msg.Id, new ChatMessage()
+                {
+                    Content = msg.Content,
+                    Name = sender.Name,
+                    Id = msg.Id
+                });
+            }
+            
         }
 
 
