@@ -1,4 +1,6 @@
-﻿namespace Selliverse.Server
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace Selliverse.Server
 {
     using Akka.Actor;
     using Microsoft.AspNetCore.Builder;
@@ -14,9 +16,9 @@
             serviceCollection.AddSingleton<SocketTranslator>();
 
             var system = ActorSystem.Create("selliverse");
-
-
             serviceCollection.AddSingleton<ActorSystem>(system);
+
+            serviceCollection.AddMvc(options => options.EnableEndpointRouting = false);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment whe)
@@ -31,6 +33,7 @@
             app.UseMiddleware<SocketMiddleware>();
             app.UseDefaultFiles();
             app.UseStaticFiles(new StaticFileOptions());
+            app.UseMvcWithDefaultRoute();
             
             app.Run(async context =>
             {
