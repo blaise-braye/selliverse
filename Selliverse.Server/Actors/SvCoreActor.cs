@@ -27,7 +27,6 @@ namespace Selliverse.Server.Actors
             this.ReceiveAsync<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
-            this.ReceiveAsync<MovementMessage>(this.HandleMovement);
             this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
             this.Receive<MovementMessage>(this.HandleMovement);
             this.throttleActor = throttleActor;
