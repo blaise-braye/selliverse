@@ -12,12 +12,7 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="wwwroot\favicon.ico" />
-    <None Include="wwwroot\index.html" />
-    <None Include="wwwroot\main.e61fb83a4a064c58.js" />
-    <None Include="wwwroot\polyfills.6438d7d902663028.js" />
-    <None Include="wwwroot\runtime.11a31260820fda0b.js" />
-    <None Include="wwwroot\styles.d913e8838559987e.css" />
+    <Content Include="wwwroot\*.*" />
   </ItemGroup>
 
 </Project>
