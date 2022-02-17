@@ -1,4 +1,6 @@
-﻿namespace Selliverse.Server.Actors
+﻿using Selliverse.Server.MessagesAsks;
+
+namespace Selliverse.Server.Actors
 {
     using Akka.Actor;
     using Selliverse.Server.Messages;
@@ -24,6 +26,7 @@
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
             this.ReceiveAsync<MovementMessage>(this.HandleMovement);
+            this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
         }
 
 
@@ -74,6 +77,10 @@
             // push the movement to all others
             await BroadCastToOthers(msg.Id, msg);
         }
-
+        
+        private void HandlePlayerListAsk(PlayerListAsk ask)
+        {
+            Sender.Tell(new PlayerListResponse(){ Players = playerConnections.Keys.ToArray() });
+        }
     }
 }

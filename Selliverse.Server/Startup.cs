@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Selliverse.Server.Actors;
 
 namespace Selliverse.Server
 {
@@ -13,11 +14,12 @@ namespace Selliverse.Server
     {
         public void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<SocketTranslator>();
-
             var system = ActorSystem.Create("selliverse");
-            serviceCollection.AddSingleton<ActorSystem>(system);
-
+            var props = Props.Create<SvCoreActor>();
+            var actor = system.ActorOf(props, "svCore");
+            serviceCollection.AddSingleton(actor);
+            
+            serviceCollection.AddSingleton<SocketTranslator>();
             serviceCollection.AddMvc(options => options.EnableEndpointRouting = false);
         }
 
