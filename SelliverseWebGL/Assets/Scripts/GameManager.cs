@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
     WebSocket websocket;
     InputField nameField;
     
-    ChatController chatController;
+    public ChatController chatController;
 
     // Start is called before the first frame update
     async void Start()

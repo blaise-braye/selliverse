@@ -55,15 +55,15 @@ public class PlayerMovement : MonoBehaviour
             velocity.y = -2.0f;
         }
 
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
+        float x = gameManager.chatController.isChatting ? 0f :  Input.GetAxis("Horizontal");
+        float z = gameManager.chatController.isChatting ? 0f : Input.GetAxis("Vertical");
 
         Vector3 move = transform.right * x + transform.forward * z;
 
         controller.Move(move * speed * Time.deltaTime);
 
 
-        if(Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if(!gameManager.chatController.isChatting && Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             Debug.Log("JUMP!!");
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
@@ -85,6 +85,5 @@ public class PlayerMovement : MonoBehaviour
         // var data = JsonUtility.ToJson(msg);
 
         gameManager.EmitMessage(msg);
-
     }
 }

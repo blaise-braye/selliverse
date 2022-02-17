@@ -23,6 +23,8 @@ public class ChatController : MonoBehaviour
     InputField chatBox;
     Text chatText;
 
+    Queue<string> chatlines;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -31,7 +33,9 @@ public class ChatController : MonoBehaviour
         canvas = GameObject.Find("HudCanvas");
         chatBox = GameObject.Find("ChatBox").GetComponent<InputField>();
         chatText = GameObject.Find("ChatText").GetComponent<Text>();
-
+        chatlines = new Queue<string>();
+        chatlines.Enqueue("Welcome to the Selliverse!");
+        this.chatText.text = "Welcome to the Selliverse!";
     }
 
     // Update is called once per frame
@@ -53,14 +57,17 @@ public class ChatController : MonoBehaviour
             }
             else
             {
-                if (Input.GetKeyDown(KeyCode.Return) && chatBox.text.Length > 0)
+                if (Input.GetKeyDown(KeyCode.Return))
                 {
-                    Debug.Log("Chatting :" + chatBox.text);
-                    gameManager.EmitMessage(new ChatMessage()
-                        {
-                            content = chatBox.text
-                        });
-                    chatBox.text = "";
+                    if(chatBox.text.Length > 0)
+                    {
+                        Debug.Log("Chatting :" + chatBox.text);
+                        gameManager.EmitMessage(new ChatMessage()
+                            {
+                                content = chatBox.text
+                            });
+                        chatBox.text = "";
+                    }
                     isChatting = false;
                 }
             }
@@ -77,6 +84,16 @@ public class ChatController : MonoBehaviour
 
     public void AddChat(string name, string content)
     {
-        this.chatText.text +=  "\r\n" + name + ": " + content;
+        this.chatlines.Enqueue(name + ": " + content);
+        while(this.chatlines.Count > 4)
+        {
+            this.chatlines.Dequeue();
+        }
+        // this.chatText.text +=  "\r\n" + name + ": " + content;
+        this.chatText.text = "";
+        foreach(var line in this.chatlines)
+        {
+            this.chatText.text += line + "\r\n";
+        }
     }
 }
