@@ -83,7 +83,7 @@ public class PlayerMovement : MonoBehaviour
 
         var data = JsonUtility.ToJson(msg);
 
-        gameManager.EmitEvent(data);
+        gameManager.EmitMessage(data);
 
     }
 }

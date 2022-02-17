@@ -32,13 +32,13 @@ public class WebSocketConnection : MonoBehaviour
             isOpen = false ;
         };
 
-        websocket.OnMessage += (bytes) =>
-        {
-            Debug.Log("Hello got something");
-            // Reading a plain text message
-            var message = System.Text.Encoding.UTF8.GetString(bytes);
-            Debug.Log("Received OnMessage! (" + bytes.Length + " bytes) " + message);
-        };
+        // websocket.OnMessage += (bytes) =>
+        // {
+        //     Debug.Log("Hello got something");
+        //     // Reading a plain text message
+        //     var message = System.Text.Encoding.UTF8.GetString(bytes);
+        //     Debug.Log("Received OnMessage! (" + bytes.Length + " bytes) " + message);
+        // };
 
 
         await websocket.Connect();
@@ -49,7 +49,9 @@ public class WebSocketConnection : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+#if !UNITY_WEBGL || UNITY_EDITOR
+        websocket.DispatchMessageQueue();
+#endif
     }
 
     public void AddHandler(WebSocketMessageEventHandler handler)
