@@ -54,7 +54,6 @@
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
                         var content = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                        Log.Information("Got message! {content}", content);
                         this.translator.OnMessage(id, content);
                     }
                     else if (result.MessageType == WebSocketMessageType.Close)

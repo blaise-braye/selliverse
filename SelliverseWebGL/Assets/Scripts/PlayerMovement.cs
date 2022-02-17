@@ -3,7 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
-{ 
+{
+
+    class MovementMessage
+    {
+        public string type = "movement";
+
+        public string x;
+
+        public string y;
+
+        public string z;
+    }
+
     
     public CharacterController controller;
 
@@ -22,13 +34,21 @@ public class PlayerMovement : MonoBehaviour
     Vector3 velocity;
     bool isGrounded;
 
+    WebSocketConnection websocketConnection;
+
+    void Start()
+    {
+        var game = GameObject.Find("Game");
+        websocketConnection = game.GetComponent<WebSocketConnection>();
+        Debug.Log("Stgarting player movement");
+    }
     
 
     // Update is called once per frame
     void Update()
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-        Debug.Log("Grounded = " + isGrounded.ToString());
+        
         if(isGrounded && velocity.y < 0)
         {
             velocity.y = -2.0f;
@@ -52,5 +72,18 @@ public class PlayerMovement : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
 
         controller.Move(velocity * Time.deltaTime);
+
+
+        var msg = new MovementMessage()
+        {
+            x = controller.transform.position.x.ToString(),
+            y = controller.transform.position.y.ToString(),
+            z = controller.transform.position.z.ToString(),
+        };
+
+        var data = JsonUtility.ToJson(msg);
+
+        websocketConnection.Send(data);
+
     }
 }
