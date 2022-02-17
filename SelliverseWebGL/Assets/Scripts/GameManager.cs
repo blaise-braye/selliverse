@@ -38,12 +38,14 @@ public class GameManager : MonoBehaviour
     WebSocket websocket;
     InputField nameField;
     
+    ChatController chatController;
 
     // Start is called before the first frame update
     async void Start()
     {
         this.state = GameState.Lobby;
         nameField = GameObject.Find("NameField").GetComponent<InputField>();
+        chatController = GameObject.Find("HUD").GetComponent<ChatController>();
 
         websocket = new WebSocket("ws://localhost:5000");
         // websocketConnection = this.GetComponent<WebSocketConnection>();
@@ -104,22 +106,23 @@ public class GameManager : MonoBehaviour
             name = nameField.text
         };
 
-        var data = JsonUtility.ToJson(enterMsg);
+        // var data = JsonUtility.ToJson(enterMsg);
 
-        EmitMessage(data);
+        EmitMessage(enterMsg);
     }
 
-    public async void EmitMessage(string msg)
+    public async void EmitMessage(object msg)
     {
         if (websocket.State == WebSocketState.Open)
         {
-            await websocket.SendText(msg);
+            await websocket.SendText(JsonUtility.ToJson(msg));
         }
     }
 
     public void HandleMessage(byte[] data)
     {
         var json = Encoding.UTF8.GetString(data);
+        Debug.Log(json);
     
         var rootmsg = JsonUtility.FromJson<RootMessage>(json);
     
@@ -129,6 +132,9 @@ public class GameManager : MonoBehaviour
         {
             case "welcome":
                 HandleWelcome(json);
+                break;
+            case "chat":
+                HandleChat(json);
                 break;
             default:
                 break;
@@ -144,10 +150,28 @@ public class GameManager : MonoBehaviour
         {
             this.state = GameState.InGame;
             Debug.Log("Welcome to the game!");
+            var lobby = GameObject.Find("Lobby");
+            lobby.SetActive(false);
+            
         }
         else
         {
             Debug.Log("Already a player with that name");
         }
     }
+
+    class ChatMessage : RootMessage
+    {
+        public string name;
+
+        public string content;
+    }
+
+    public void HandleChat(string json)
+    {
+        var chatMsg = JsonUtility.FromJson<ChatMessage>(json);
+
+        chatController.AddChat(chatMsg.name, chatMsg.content);
+    }   
+
 }

@@ -36,6 +36,7 @@ public class PlayerMovement : MonoBehaviour
 
     GameManager gameManager;
 
+
     void Start()
     {
         var game = GameObject.Find("Game");
@@ -81,9 +82,9 @@ public class PlayerMovement : MonoBehaviour
             z = controller.transform.position.z.ToString(),
         };
 
-        var data = JsonUtility.ToJson(msg);
+        // var data = JsonUtility.ToJson(msg);
 
-        gameManager.EmitMessage(data);
+        gameManager.EmitMessage(msg);
 
     }
 }
