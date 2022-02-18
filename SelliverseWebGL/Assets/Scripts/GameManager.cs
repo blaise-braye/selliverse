@@ -40,6 +40,8 @@ public class GameManager : MonoBehaviour
     WebSocket websocket;
     InputField nameField;
 
+    Dictionary<string, GameObject> players;
+
     public ChatController chatController;
 
     // Start is called before the first frame update
@@ -50,17 +52,9 @@ public class GameManager : MonoBehaviour
         chatController = GameObject.Find("HUD").GetComponent<ChatController>();
         var uri = UseLocal ? "wss://localhost:5001" : "wss://selliverse.azurewebsites.net/";
         websocket = new WebSocket(uri);
+        players = new Dictionary<string, GameObject>();
         Debug.Log("connecting to " + uri);
-        // websocketConnection = this.GetComponent<WebSocketConnection>();
-        // websocketConnection = new WebSocketConnection();
-        // websocketConnection.Start();
-        // websocketConnection.AddHandler(handleIncomingMessage);
 
-        // {
-        //     // Reading a plain text message
-        //     var message = System.Text.Encoding.UTF8.GetString(bytes);
-        //     Debug.Log("Received OnMessage! (" + bytes.Length + " bytes) " + message);
-        // };
         websocket.OnOpen += () =>
         {
             Debug.Log("Connection open!");
