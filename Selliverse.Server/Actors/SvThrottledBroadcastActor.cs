@@ -14,6 +14,7 @@
 
     public class MovementToGameMessage
     {
+        public String Type { get; set; } = "movement";
         public String Id { get; set; }
 
         public String X { get; set; }
