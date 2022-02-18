@@ -7,7 +7,7 @@
             Selliverse
           </div>
           <div class="flex-shrink-0 flex">
-            <img src="assets/selligent_logo_blue.png" class="ml-5 h-10"/>
+            <img src="assets/selligent_logo_blue.png" class="ml-5 h-10" />
           </div>
         </div>
       </div>
@@ -19,14 +19,15 @@
   <!--  Title stuff-->
   <ng-container *ngIf="isLoaded$ | async; else notLoaded">
     <div class="self-center mt-12">
-      <button class="button-63" role="button" (click)="connect()">Connect</button>
+      <button class="button-63" role="button" (click)="connect()">Enter the Selliverse</button>
     </div>
   </ng-container>
 
   <ng-template #notLoaded>
     <div class="text-center text-3xl" style="color: rgba(6,64,79)">
       <div class="animate__animated animate__slideInLeft" style="animation-duration: 2s;">To make every day magic</div>
-      <div class="animate__animated animate__slideInRight" style="animation-duration: 2s;">through the science and art
+      <div class="animate__animated animate__slideInRight" style="animation-duration: 2s;">
+        through the science and art
         of
       </div>
       <div class="animate__animated animate__slideInLeft" style="animation-duration: 2s;">
