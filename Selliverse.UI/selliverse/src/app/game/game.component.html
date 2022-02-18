@@ -1,5 +1,14 @@
-<iframe src="https://selliverse.azurewebsites.net/game/" target="_self" class="w-full h-full flex-grow"></iframe>
+<div class="p-2 w-full h-full">
+  <div class="flex row">
+    <p class="flex-grow px-5" *ngIf="showAccelerationBanner === '1'">
+      If the game feels chunky, make sure your hardware acceleration is enabled. <a
+      href="https://blog.colonist.io/how-to-enable-webgl/" class="underline">Read
+      more</a> <br />
+      Use the arrow keys to move around in this magical world.
+    </p>
+    <p class="px-5 text-right hover:cursor-pointer" (click)="hideMessage()" *ngIf="showAccelerationBanner === '1'">X</p>
+  </div>
 
-<p>
-  Make sure your  hardware acceleration is enabled, <a href="https://blog.colonist.io/how-to-enable-webgl/">read more</a>.
-</p>
+  <iframe src="https://selliverse.azurewebsites.net/game/" target="_self" class="flex-grow w-full h-full"></iframe>
+</div>
+
