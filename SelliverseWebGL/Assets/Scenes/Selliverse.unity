@@ -6078,6 +6078,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 5541572419349962707, guid: 7d58ff8249b1cf6429e3f1f73e0e7cf9, type: 3}
+      propertyPath: m_Text
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5541572419349962707, guid: 7d58ff8249b1cf6429e3f1f73e0e7cf9, type: 3}
       propertyPath: m_FontSize
       value: 100
       objectReference: {fileID: 0}
