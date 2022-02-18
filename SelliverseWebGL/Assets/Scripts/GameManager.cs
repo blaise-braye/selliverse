@@ -31,6 +31,8 @@ public class GameManager : MonoBehaviour
         public string type = "enter";
 
         public string name;
+
+        public string id;
     }
 
     public bool UseLocal = true;
@@ -136,6 +138,9 @@ public class GameManager : MonoBehaviour
             case "movement":
                 HandleMovement(json);
                 break;
+            case "entered":
+                HandleEntered(json);
+                break;
             default:
                 break;
         }
@@ -164,6 +169,12 @@ public class GameManager : MonoBehaviour
         Debug.Log("Got some movement " + json);
         var moveMsg = JsonUtility.FromJson<MovementMessage>(json);
 
+    }
+
+    public void HandleEntered(string json)
+    {
+        Debug.Log("Someone entered " + json);
+        var moveMsg = JsonUtility.FromJson<EnterMessage>(json);
     }
 
     class ChatMessage : RootMessage
