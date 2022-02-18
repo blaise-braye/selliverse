@@ -65,19 +65,18 @@ public class MouseLook : MonoBehaviour
                 playerBody.Rotate(Vector3.up * mouseX);
                 var veccy =  playerBody.transform.rotation.eulerAngles;
 
-                if(Math.Abs(xRotation - lastRotPush) > 0.01f)
-                {
+
                     lastRotPush = xRotation;
                     var msg = new RotationMessage()
                     {
-                        x = veccy.x.ToString(CultureInfo.InvariantCulture),
+                        x = veccy.y.ToString(CultureInfo.InvariantCulture),
                         // y = veccy.y.ToString(CultureInfo.InvariantCulture),
                         //z = veccy.z.ToString(CultureInfo.InvariantCulture)
                     };
                     
 
                     gameManager.EmitMessage(msg);
-                }
+
             }
         }
     }
