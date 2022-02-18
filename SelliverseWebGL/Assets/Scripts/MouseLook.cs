@@ -13,6 +13,7 @@ public class MouseLook : MonoBehaviour
 
     float xRotation = 0f;
 
+    bool focus = false;
 
     
 
@@ -26,14 +27,25 @@ public class MouseLook : MonoBehaviour
         
     }
 
+    void OnApplicationFocus(bool focused)
+    {
+        // if (gameManager.state == GameState.InGame)
+        {
+             // focus = focused;
+        } 
+    }
+
     // Update is called once per frame
     void Update()
     {
+
         if (gameManager.state == GameState.InGame)
         {
+
             Cursor.lockState = CursorLockMode.Locked;
-
-
+            
+            if(Cursor.lockState == CursorLockMode.Locked)
+            {
             float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
             float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
@@ -42,6 +54,7 @@ public class MouseLook : MonoBehaviour
 
             transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
             playerBody.Rotate(Vector3.up * mouseX);
+            }
         }
     }
 }
