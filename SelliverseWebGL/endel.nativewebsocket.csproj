@@ -61,6 +61,7 @@
      <Compile Include="Assets\OccaSoftware\Enflame\Scripts\OscillateLightBrightness.cs" />
      <Compile Include="Assets\BrokenVector\LowPolyBrickHouses\Editor\ModelCustomizerInspector.cs" />
      <Compile Include="Assets\BrokenVector\LowPolyBrickHouses\Scripts\ModelCustomizer.cs" />
+     <Compile Include="Assets\Scripts\Regional.cs" />
      <None Include="Assets\BOXOPHOBIC\Skybox Cubemap Extended\Core\Shaders\Skybox Cubemap Extended.shader" />
      <None Include="Assets\endel.nativewebsocket.asmdef" />
      <None Include="Assets\LowPolyWater_Pack\Shaders\WaterShaded.shader" />
