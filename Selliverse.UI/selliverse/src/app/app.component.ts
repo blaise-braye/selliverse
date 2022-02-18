@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {delay, map, mapTo, Observable, startWith} from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -7,13 +6,5 @@ import {delay, map, mapTo, Observable, startWith} from 'rxjs';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'Selliverse';
 
-  isLoaded$ = new Observable<boolean>().pipe(startWith(false), delay(4000), mapTo(true))
-
-  connect() {
-    alert('cmon guys, work harder!')
-  }
 }
-
-

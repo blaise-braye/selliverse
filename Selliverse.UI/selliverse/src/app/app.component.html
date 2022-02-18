@@ -2,12 +2,12 @@
   <nav>
     <div class="mx-auto px-2 sm:px-6 lg:px-8">
       <div class="relative flex items-center h-16">
-        <div class="flex-1 flex items-center">
+        <div class="flex-1 flex items-center hover:cursor-pointer" [routerLink]="'/'">
           <div class="text-center text-3xl" style="color: rgba(6,64,79)">
             Selliverse
           </div>
           <div class="flex-shrink-0 flex">
-            <img src="assets/selligent_logo_blue.png" class="ml-5 h-10" />
+            <img src="assets/selligent_logo_blue.png" class="ml-5 h-10" alt="logo"/>
           </div>
         </div>
       </div>
@@ -15,32 +15,4 @@
   </nav>
 </header>
 
-<div class="flex flex-col h-fit p-5 min-h-[500px]">
-  <!--  Title stuff-->
-  <ng-container *ngIf="isLoaded$ | async; else notLoaded">
-    <div class="self-center mt-12">
-      <button class="button-63" role="button" (click)="connect()">Enter the Selliverse</button>
-    </div>
-  </ng-container>
-
-  <ng-template #notLoaded>
-    <div class="text-center text-3xl" style="color: rgba(6,64,79)">
-      <div class="animate__animated animate__slideInLeft" style="animation-duration: 2s;">To make every day magic</div>
-      <div class="animate__animated animate__slideInRight" style="animation-duration: 2s;">
-        through the science and art
-        of
-      </div>
-      <div class="animate__animated animate__slideInLeft" style="animation-duration: 2s;">
-        <div class="animate__animated animate__heartBeat" style="animation-delay: 2s;">
-          connection
-        </div>
-      </div>
-    </div>
-  </ng-template>
-
-  <hr>
-
-  <div class="flex flex-row">
-    <app-user-overview></app-user-overview>
-  </div>
-</div>
+<router-outlet></router-outlet>

@@ -26,15 +26,18 @@ namespace Selliverse.Server.Actors
 
         public readonly IActorRef throttleActor;
 
-        public SvCoreActor(IActorRef throttleActor)
+        public SvCoreActor()
         {
+            var throttleProps = Props.Create<SvThrottledBroadcastActor>(() => new SvThrottledBroadcastActor(Self));
+            throttleActor = Context.ActorOf(throttleProps, "svThrottle");
+
             this.Receive<PlayerConnectedMessage>(this.HandlePlayerConnected);
             this.Receive<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
             this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
             this.Receive<MovementMessage>(this.HandleMovement);
-            this.throttleActor = throttleActor;
+            this.ReceiveAsync<MovementToGameMessage>(this.HandleMovementToGame);
         }
 
 
@@ -47,7 +50,7 @@ namespace Selliverse.Server.Actors
         }
 
         private async Task BroadCastToAll(string id, object message)
-        {   
+        {
             foreach (var (_, socket) in playerConnections)
             {
                 await socket.SendItRight(message);
@@ -72,6 +75,11 @@ namespace Selliverse.Server.Actors
             }
         }
 
+        private async Task HandleMovementToGame(MovementToGameMessage msg)
+        {
+            await BroadCastToOthers(msg.Id, msg);
+        }
+
         private void HandlePlayerConnected(PlayerConnectedMessage msg)
         {
             Log.Information("New player {id}", msg.Id);
@@ -88,12 +96,12 @@ namespace Selliverse.Server.Actors
             this.playerConnections.Remove(msg.Id);
             this.playerStates.Remove(msg.Id);
         }
-        
+
         private async Task HandleChat(ChatMessage msg)
         {
             Log.Information("{id}: {content}", msg.Id, msg.Content);
             // look up the name
-            if(this.playerStates.TryGetValue(msg.Id, out var sender))
+            if (this.playerStates.TryGetValue(msg.Id, out var sender))
             {
                 if (lastMessages.Count > 4)
                 {
@@ -111,7 +119,7 @@ namespace Selliverse.Server.Actors
 
                 await BroadcastChat(chatMessage, sender);
             }
-            
+
         }
 
         private async Task HandlePlayerEnteredGame(PlayerEnteredGameMessage msg)
@@ -133,7 +141,7 @@ namespace Selliverse.Server.Actors
                 {
                     IsWelcome = true,
                 });
-                
+
                 foreach (var message in lastMessages)
                 {
                     await this.playerConnections[msg.Id].SendItRight(message);
@@ -148,22 +156,30 @@ namespace Selliverse.Server.Actors
                 //    });
                 //}
 
-                foreach(var (id, player) in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
+                
+
+                foreach (var (id, otherPlayer) in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if(this.playerStates.TryGetValue(id, out PlayerState otherPlayer))
+                    if (this.playerStates.TryGetValue(id, out PlayerState otherPlayerState))
                     {
-                        if(otherPlayer.GameState == GameState.InGame)
+                        if (otherPlayerState.GameState == GameState.InGame)
                         {
-                            await player.SendItRight(new PlayerEnteredGameMessage()
+                            await otherPlayer.SendItRight(new PlayerEnteredGameMessage()
+                            {
+                                Id = msg.Id,
+                                Name = msg.Name
+                                
+                            });
+                            await this.playerConnections[msg.Id].SendItRight(new PlayerEnteredGameMessage()
                             {
                                 Id = id,
-                                Name = otherPlayer.Name
+                                Name = otherPlayerState.Name,
                             });
                         }
                     }
                 }
 
-                
+
             }
         }
 
