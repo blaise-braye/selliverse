@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using NativeWebSocket;
 using System.Text;
+using System.Globalization;
 
 public enum GameState
 {
@@ -174,9 +175,9 @@ public class GameManager : MonoBehaviour
         if(this.players.TryGetValue(moveMsg.id, out GameObject go))
         {
             var location = new Vector3(
-                float.Parse(moveMsg.x),
-                float.Parse(moveMsg.y),
-                float.Parse(moveMsg.z)
+                float.Parse(moveMsg.x, CultureInfo.InvariantCulture),
+                float.Parse(moveMsg.y, CultureInfo.InvariantCulture),
+                float.Parse(moveMsg.z, CultureInfo.InvariantCulture)
             );
 
             go.transform.position = location;

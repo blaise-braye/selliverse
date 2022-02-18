@@ -44,7 +44,7 @@
         public SvThrottledBroadcastActor(IActorRef daddyActor)
         {
             this._daddy = daddyActor;
-            Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.Zero, TimeSpan.FromMilliseconds(100), Self, new SendThrottledPositionsMessage(), Self);
+            Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.Zero, TimeSpan.FromMilliseconds(50), Self, new SendThrottledPositionsMessage(), Self);
             this.Receive<MovementMessage>(this.HandleMovement);
             this.ReceiveAsync<SendThrottledPositionsMessage>(this.HandleSendThrottledPositionsMessage);
             
