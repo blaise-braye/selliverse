@@ -31,6 +31,8 @@ public class GameManager : MonoBehaviour
         public string type = "enter";
 
         public string name;
+
+        public string id;
     }
 
     public bool UseLocal = true;
@@ -53,6 +55,7 @@ public class GameManager : MonoBehaviour
         var uri = UseLocal ? "wss://localhost:5001" : "wss://selliverse.azurewebsites.net/";
         websocket = new WebSocket(uri);
         players = new Dictionary<string, GameObject>();
+
         Debug.Log("connecting to " + uri);
 
         websocket.OnOpen += () =>
@@ -132,6 +135,12 @@ public class GameManager : MonoBehaviour
             case "chat":
                 HandleChat(json);
                 break;
+            case "movement":
+                HandleMovement(json);
+                break;
+            case "entered":
+                HandleEntered(json);
+                break;
             default:
                 break;
         }
@@ -155,6 +164,19 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void HandleMovement(string json)
+    {
+        Debug.Log("Got some movement " + json);
+        var moveMsg = JsonUtility.FromJson<MovementMessage>(json);
+
+    }
+
+    public void HandleEntered(string json)
+    {
+        Debug.Log("Someone entered " + json);
+        var moveMsg = JsonUtility.FromJson<EnterMessage>(json);
+    }
+
     class ChatMessage : RootMessage
     {
         public string name;
@@ -167,6 +189,16 @@ public class GameManager : MonoBehaviour
         var chatMsg = JsonUtility.FromJson<ChatMessage>(json);
 
         chatController.AddChat(chatMsg.name, chatMsg.content);
+    }
+
+    class MovementMessage : RootMessage
+    {
+
+        public string x;
+
+        public string y;
+
+        public string z;
     }
 
 }

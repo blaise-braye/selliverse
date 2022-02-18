@@ -67,7 +67,7 @@
 
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Notify manager
                 this.translator.OnDisconnected(id);

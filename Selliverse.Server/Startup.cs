@@ -1,6 +1,8 @@
 ﻿using System.IO.Compression;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Net.Http.Headers;
 using Selliverse.Server.Actors;
 
 namespace Selliverse.Server
@@ -47,13 +49,29 @@ namespace Selliverse.Server
             app.UseMiddleware<SocketMiddleware>();
             app.UseResponseCompression();
             app.UseDefaultFiles();
-            app.UseStaticFiles(new StaticFileOptions());
+            app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = OnPrepareResponse });
             app.UseMvcWithDefaultRoute();
             
             app.Run(async context =>
             {
                 await context.Response.WriteAsync("The Selliverse isn't real, it cannot hurt you. v+2");
             });
+        }
+
+        private void OnPrepareResponse(StaticFileResponseContext context)
+        {
+            var file = context.File;
+            var response = context.Context.Response;
+
+            if (file.Name.EndsWith(".gz"))
+            {
+                response.Headers[HeaderNames.ContentEncoding] = "gzip";
+            }
+
+            if (file.Name.EndsWith(".wasm.gz"))
+            {
+                response.ContentType = "application/wasm";
+            }
         }
     }
 }

@@ -9,12 +9,15 @@ namespace Selliverse.Server.Actors
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.WebSockets;
+    using System.Numerics;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
 
     public class SvCoreActor : ReceiveActor
     {
+        public const int CHAT_DISTANCE = 1000;
+
         private Dictionary<string, WebSocket> playerConnections = new Dictionary<string, WebSocket>();
 
         private Dictionary<string, PlayerState> playerStates = new Dictionary<string, PlayerState>();
@@ -25,8 +28,8 @@ namespace Selliverse.Server.Actors
 
         public SvCoreActor(IActorRef throttleActor)
         {
-            this.ReceiveAsync<PlayerConnectedMessage>(this.HandlePlayerConnected);
-            this.ReceiveAsync<PlayerLeftMessage>(this.HandlePlayerLeft);
+            this.Receive<PlayerConnectedMessage>(this.HandlePlayerConnected);
+            this.Receive<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
             this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
@@ -44,14 +47,32 @@ namespace Selliverse.Server.Actors
         }
 
         private async Task BroadCastToAll(string id, object message)
-        {   
+        {
             foreach (var (_, socket) in playerConnections)
             {
                 await socket.SendItRight(message);
             }
         }
 
-        private async Task HandlePlayerConnected(PlayerConnectedMessage msg)
+        private async Task BroadcastChat(ChatMessage message, PlayerState sender)
+        {
+            var senderPos = sender.Position;
+            foreach (var player in playerStates)
+            {
+                // calculate distance
+                var distance = Vector3.Distance(player.Value.Position, senderPos);
+
+                if (distance < CHAT_DISTANCE)
+                {
+                    if (this.playerConnections.TryGetValue(player.Key, out var receiver))
+                    {
+                        await receiver.SendItRight(message);
+                    }
+                }
+            }
+        }
+
+        private void HandlePlayerConnected(PlayerConnectedMessage msg)
         {
             Log.Information("New player {id}", msg.Id);
             this.playerConnections.Add(msg.Id, msg.WebSocket);
@@ -61,18 +82,18 @@ namespace Selliverse.Server.Actors
             });
         }
 
-        private async Task HandlePlayerLeft(PlayerLeftMessage msg)
+        private void HandlePlayerLeft(PlayerLeftMessage msg)
         {
             Log.Information("Player {id} left", msg.Id);
             this.playerConnections.Remove(msg.Id);
             this.playerStates.Remove(msg.Id);
         }
-        
+
         private async Task HandleChat(ChatMessage msg)
         {
             Log.Information("{id}: {content}", msg.Id, msg.Content);
             // look up the name
-            if(this.playerStates.TryGetValue(msg.Id, out var sender))
+            if (this.playerStates.TryGetValue(msg.Id, out var sender))
             {
                 if (lastMessages.Count > 4)
                 {
@@ -88,11 +109,10 @@ namespace Selliverse.Server.Actors
 
                 lastMessages.Enqueue(chatMessage);
 
-                await BroadCastToAll(msg.Id, chatMessage);
+                await BroadcastChat(chatMessage, sender);
             }
-            
-        }
 
+        }
 
         private async Task HandlePlayerEnteredGame(PlayerEnteredGameMessage msg)
         {
@@ -113,7 +133,7 @@ namespace Selliverse.Server.Actors
                 {
                     IsWelcome = true,
                 });
-                
+
                 foreach (var message in lastMessages)
                 {
                     await this.playerConnections[msg.Id].SendItRight(message);
@@ -128,22 +148,23 @@ namespace Selliverse.Server.Actors
                 //    });
                 //}
 
-                foreach(var (id, player) in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
+                foreach (var (id, player) in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if(this.playerStates.TryGetValue(id, out PlayerState otherPlayer))
+                    if (this.playerStates.TryGetValue(id, out PlayerState otherPlayer))
                     {
-                        if(otherPlayer.GameState == GameState.InGame)
+                        if (otherPlayer.GameState == GameState.InGame)
                         {
                             await player.SendItRight(new PlayerEnteredGameMessage()
                             {
                                 Id = id,
-                                Name = otherPlayer.Name
+                                Name = otherPlayer.Name,
+                                Type = "entered"
                             });
                         }
                     }
                 }
 
-                await BroadCastToOthers(msg.Id, msg);
+
             }
         }
 
