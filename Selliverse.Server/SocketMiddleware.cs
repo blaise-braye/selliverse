@@ -46,10 +46,7 @@
             {
                 while (socket.State == WebSocketState.Open)
                 {
-                    var result =
-                        await socket.ReceiveAsync(
-                            new ArraySegment<byte>(buffer),
-                            CancellationToken.None);
+                    var result = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
