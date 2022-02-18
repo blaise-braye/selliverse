@@ -67,6 +67,11 @@ namespace Selliverse.Server
             {
                 response.Headers[HeaderNames.ContentEncoding] = "gzip";
             }
+
+            if (file.Name.EndsWith(".wasm.gz"))
+            {
+                response.ContentType = "application/wasm";
+            }
         }
     }
 }
