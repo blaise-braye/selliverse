@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.IO.Compression;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.ResponseCompression;
 using Selliverse.Server.Actors;
 
 namespace Selliverse.Server
@@ -12,7 +14,7 @@ namespace Selliverse.Server
 
     public class Startup
     {
-        public void ConfigureServices(IServiceCollection serviceCollection)
+        public void ConfigureServices(IServiceCollection services)
         {
             var system = ActorSystem.Create("selliverse");
             var throttleProps = Props.Create<SvThrottledBroadcastActor>();
@@ -20,10 +22,17 @@ namespace Selliverse.Server
 
             var props = Props.Create<SvCoreActor>(() => new SvCoreActor(throttleActor));
             var actor = system.ActorOf(props, "svCore");
-            serviceCollection.AddSingleton(actor);
+            services.AddSingleton(actor);
             
-            serviceCollection.AddSingleton<SocketTranslator>();
-            serviceCollection.AddMvc(options => options.EnableEndpointRouting = false);
+            services.AddSingleton<SocketTranslator>();
+
+            services.Configure<GzipCompressionProviderOptions>
+                (options => options.Level = CompressionLevel.Optimal);
+            services.AddResponseCompression(options =>
+            {
+                options.Providers.Add<GzipCompressionProvider>();
+            });
+            services.AddMvc(options => options.EnableEndpointRouting = false);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment whe)
@@ -36,6 +45,7 @@ namespace Selliverse.Server
             app.UseWebSockets(websocketOptions);
             app.UseHttpsRedirection();
             app.UseMiddleware<SocketMiddleware>();
+            app.UseResponseCompression();
             app.UseDefaultFiles();
             app.UseStaticFiles(new StaticFileOptions());
             app.UseMvcWithDefaultRoute();
