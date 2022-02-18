@@ -63,15 +63,18 @@ public class MouseLook : MonoBehaviour
 
                 transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
                 playerBody.Rotate(Vector3.up * mouseX);
+                var veccy =  playerBody.transform.rotation.eulerAngles;
 
                 if(Math.Abs(xRotation - lastRotPush) > 0.01f)
                 {
                     lastRotPush = xRotation;
                     var msg = new RotationMessage()
                     {
-                        x = xRotation.ToString(CultureInfo.InvariantCulture)
+                        x = veccy.x.ToString(CultureInfo.InvariantCulture),
+                        // y = veccy.y.ToString(CultureInfo.InvariantCulture),
+                        //z = veccy.z.ToString(CultureInfo.InvariantCulture)
                     };
-                    Debug.Log("Rotating " + msg.x);
+                    
 
                     gameManager.EmitMessage(msg);
                 }

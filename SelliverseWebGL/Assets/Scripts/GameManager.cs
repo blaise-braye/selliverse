@@ -129,7 +129,7 @@ public class GameManager : MonoBehaviour
 
         var rootmsg = JsonUtility.FromJson<RootMessage>(json);
 
-        Debug.Log("Got a '" + rootmsg.type + "' from the server : " + json);
+        // 
         switch (rootmsg.type)
         {
             case "welcome":
@@ -151,6 +151,7 @@ public class GameManager : MonoBehaviour
                 HandleLeft(json);
                 break;
             default:
+                Debug.Log("Got a '" + rootmsg.type + "' from the server : " + json);
                 break;
         }
     }
@@ -209,8 +210,8 @@ public class GameManager : MonoBehaviour
         var rotMsg = JsonUtility.FromJson<RotationMessage>(json);
         if(this.players.TryGetValue(rotMsg.id, out GameObject go))
         {
-            go.gameObject.transform.rotation = Quaternion.identity;
-            go.gameObject.transform.Rotate(Vector3.up * float.Parse(rotMsg.x, CultureInfo.InvariantCulture));
+            go.gameObject.transform.rotation = Quaternion.Euler(float.Parse(rotMsg.x, CultureInfo.InvariantCulture), 0.0f, 0.0f);
+            // go.gameObject.transform.Rotate(Vector3.up * ((float.Parse(rotMsg.x, CultureInfo.InvariantCulture) + (Mathf.PI / 4.0f)) ));
         }
     }
 
