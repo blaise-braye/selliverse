@@ -36,6 +36,13 @@ public class GameManager : MonoBehaviour
         public string id;
     }
 
+    class MoveMessage : RootMessage
+    {
+        public string x;
+        public string y;
+        public string z;
+    }
+
     public bool UseLocal = true;
 
     public GameState state;
@@ -47,12 +54,14 @@ public class GameManager : MonoBehaviour
 
     GameObject selliFab;
     public ChatController chatController;
+    PlayerMovement playerMovement;
 
     // Start is called before the first frame update
     async void Start()
     {
         this.state = GameState.Lobby;
         nameField = GameObject.Find("NameField").GetComponent<InputField>();
+        playerMovement = GameObject.Find("Player").GetComponent<PlayerMovement>();
         chatController = GameObject.Find("HUD").GetComponent<ChatController>();
         selliFab = GameObject.Find("SelliFab");
         var uri = UseLocal ? "wss://localhost:5001" : "wss://selliverse.azurewebsites.net/";
@@ -150,6 +159,9 @@ public class GameManager : MonoBehaviour
             case "left":
                 HandleLeft(json);
                 break;
+            case "move":
+                HandleMove(json);
+                break;
             default:
                 Debug.Log("Got a '" + rootmsg.type + "' from the server : " + json);
                 break;
@@ -238,6 +250,21 @@ public class GameManager : MonoBehaviour
         var chatMsg = JsonUtility.FromJson<ChatMessage>(json);
 
         chatController.AddChat(chatMsg.name, chatMsg.content);
+    }
+
+    public void HandleMove(string json)
+    {
+        var chatMsg = JsonUtility.FromJson<MoveMessage>(json);
+
+        var location = new Vector3(
+                float.Parse(chatMsg.x, CultureInfo.InvariantCulture),
+                float.Parse(chatMsg.y, CultureInfo.InvariantCulture),
+                float.Parse(chatMsg.z, CultureInfo.InvariantCulture)
+            );
+
+        playerMovement.Teleport(location);
+
+        Debug.Log("Move Command " + json);
     }
 
     class MovementMessage : RootMessage

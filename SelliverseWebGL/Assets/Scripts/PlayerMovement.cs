@@ -37,6 +37,8 @@ public class PlayerMovement : MonoBehaviour
 
     GameManager gameManager;
 
+    bool teleport = false;
+    Vector3 newPosition = Vector3.zero;
 
     void Start()
     {
@@ -45,6 +47,20 @@ public class PlayerMovement : MonoBehaviour
         Debug.Log("Stgarting player movement");
     }
     
+    public void Teleport(Vector3 destination)
+    {
+        teleport = true;
+        newPosition = destination;
+    }
+
+    private void FixedUpdate()
+    {
+        if (teleport)
+        {
+            transform.position = newPosition;
+            teleport = false;
+        }
+    }
 
     // Update is called once per frame
     async void Update()

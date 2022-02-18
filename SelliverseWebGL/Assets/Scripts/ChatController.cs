@@ -14,6 +14,13 @@ public class ChatController : MonoBehaviour
         public string content;
     }
 
+    class CommandMessage
+    {
+        public string type = "command";
+
+        public string content;
+    }
+
     public bool isChatting = false;
 
 
@@ -63,10 +70,22 @@ public class ChatController : MonoBehaviour
                     if(chatBox.text.Length > 0)
                     {
                         Debug.Log("Chatting :" + chatBox.text);
-                        gameManager.EmitMessage(new ChatMessage()
+
+                        if (chatBox.text.StartsWith("/"))
+                        {
+                            Debug.Log("Command :" + chatBox.text);
+                            gameManager.EmitMessage(new CommandMessage()
+                            {
+                                content = chatBox.text.Substring(1)
+                            });
+                        }
+                        else
+                        {
+                            gameManager.EmitMessage(new ChatMessage()
                             {
                                 content = chatBox.text
                             });
+                        }
                         chatBox.text = "";
                         isChatting = false;
                     }
