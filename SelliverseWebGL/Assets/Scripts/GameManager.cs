@@ -192,6 +192,8 @@ public class GameManager : MonoBehaviour
         var enterMsg = JsonUtility.FromJson<EnterMessage>(json);
 
         GameObject childGameObject = Instantiate(selliFab, new Vector3(-55f, 5f, -50f), Quaternion.identity);
+        var text = childGameObject.GetComponentInChildren<TextMesh>();
+        text.text = enterMsg.name;
         this.players.Add(enterMsg.id, childGameObject);
     }
 
