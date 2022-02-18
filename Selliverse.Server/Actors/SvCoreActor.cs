@@ -28,8 +28,8 @@ namespace Selliverse.Server.Actors
 
         public SvCoreActor(IActorRef throttleActor)
         {
-            this.ReceiveAsync<PlayerConnectedMessage>(this.HandlePlayerConnected);
-            this.ReceiveAsync<PlayerLeftMessage>(this.HandlePlayerLeft);
+            this.Receive<PlayerConnectedMessage>(this.HandlePlayerConnected);
+            this.Receive<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
             this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
@@ -82,7 +82,7 @@ namespace Selliverse.Server.Actors
             });
         }
 
-        private async Task HandlePlayerLeft(PlayerLeftMessage msg)
+        private void HandlePlayerLeft(PlayerLeftMessage msg)
         {
             Log.Information("Player {id} left", msg.Id);
             this.playerConnections.Remove(msg.Id);
@@ -140,15 +140,28 @@ namespace Selliverse.Server.Actors
                     await this.playerConnections[msg.Id].SendItRight(message);
                 }
 
-                await BroadCastToOthers(msg.Id, msg);
+                //foreach(var player in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
+                //{
+                //    await player.Value.SendItRight(new ChatMessage()
+                //    {
+                //        Content = $"Player {msg.Name} has entered the Selliverse",
+                //        Name = msg.Name
+                //    });
+                //}
 
-                foreach (var player in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
+                foreach(var (id, player) in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
                 {
-                    await player.Value.SendItRight(new ChatMessage()
+                    if(this.playerStates.TryGetValue(id, out PlayerState otherPlayer))
                     {
-                        Content = $"Player {msg.Name} has entered the Selliverse",
-                        Name = msg.Name
-                    });
+                        if(otherPlayer.GameState == GameState.InGame)
+                        {
+                            await player.SendItRight(new PlayerEnteredGameMessage()
+                            {
+                                Id = id,
+                                Name = otherPlayer.Name
+                            });
+                        }
+                    }
                 }
 
                 
