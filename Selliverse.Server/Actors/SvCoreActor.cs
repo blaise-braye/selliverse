@@ -130,7 +130,16 @@ namespace Selliverse.Server.Actors
 
         private void HandlePlayerListAsk(PlayerListAsk ask)
         {
-            Sender.Tell(new PlayerListResponse() { Players = playerConnections.Keys.ToArray() });
+            var response = playerStates.Select(ps =>
+            {
+                return new ConnectedPlayer()
+                {
+                    Id = ps.Key,
+                    Name = ps.Value.Name
+                };
+            }).ToArray();
+
+            Sender.Tell(new PlayerListResponse() { Players = response });
         }
     }
 }
