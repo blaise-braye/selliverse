@@ -102,8 +102,7 @@ namespace Selliverse.Server.Actors
                 // not allowed
                 await this.playerConnections[msg.Id].SendItRight(new PlayerWelcomeMessage()
                 {
-                    IsWelcome = false,
-                    LastMessages = lastMessages.ToArray()
+                    IsWelcome = false
                 });
             }
             else
@@ -112,8 +111,14 @@ namespace Selliverse.Server.Actors
                 this.playerStates[msg.Id].GameState = GameState.InGame;
                 await this.playerConnections[msg.Id].SendItRight(new PlayerWelcomeMessage()
                 {
-                    IsWelcome = true
+                    IsWelcome = true,
                 });
+                
+                foreach (var message in lastMessages)
+                {
+                    await this.playerConnections[msg.Id].SendItRight(message);
+                }
+
                 await BroadCastToOthers(msg.Id, msg);
             }
         }
