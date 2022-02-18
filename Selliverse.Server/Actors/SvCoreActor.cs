@@ -38,6 +38,7 @@ namespace Selliverse.Server.Actors
             this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
             this.Receive<MovementMessage>(this.HandleMovement);
             this.ReceiveAsync<MovementToGameMessage>(this.HandleMovementToGame);
+            this.ReceiveAsync<RotationMessage>(this.HandleRotation);
         }
 
 
@@ -124,7 +125,7 @@ namespace Selliverse.Server.Actors
 
         private async Task HandleRotation(RotationMessage msg)
         {
-
+            await BroadCastToOthers(msg.Id, msg);
         }
 
         private async Task HandlePlayerEnteredGame(PlayerEnteredGameMessage msg)
