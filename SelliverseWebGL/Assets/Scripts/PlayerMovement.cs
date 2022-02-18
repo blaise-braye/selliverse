@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -48,6 +49,8 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     async void Update()
     {
+        var oldPosition = controller.transform.position;
+
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         
         if(isGrounded && velocity.y < 0)
@@ -75,15 +78,18 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
 
 
-        var msg = new MovementMessage()
+        if(Vector3.Distance(oldPosition, controller.transform.position) > 0.01f)
         {
-            x = controller.transform.position.x.ToString(),
-            y = controller.transform.position.y.ToString(),
-            z = controller.transform.position.z.ToString(),
-        };
+            var msg = new MovementMessage()
+            {
+                x = controller.transform.position.x.ToString(CultureInfo.InvariantCulture),
+                y = controller.transform.position.y.ToString(CultureInfo.InvariantCulture),
+                z = controller.transform.position.z.ToString(CultureInfo.InvariantCulture),
+            };
 
-        // var data = JsonUtility.ToJson(msg);
+            // var data = JsonUtility.ToJson(msg);
 
-        gameManager.EmitMessage(msg);
+            gameManager.EmitMessage(msg);
+        }
     }
 }

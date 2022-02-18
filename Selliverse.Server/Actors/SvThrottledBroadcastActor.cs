@@ -5,6 +5,7 @@
     using Serilog;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Net.WebSockets;
     using System.Numerics;
@@ -28,9 +29,9 @@
             return new MovementToGameMessage()
             {
                 Id = id,
-                X = pos.Position.X.ToString(),
-                Y = pos.Position.Y.ToString(),
-                Z = pos.Position.Z.ToString(),
+                X = pos.Position.X.ToString(CultureInfo.InvariantCulture),
+                Y = pos.Position.Y.ToString(CultureInfo.InvariantCulture),
+                Z = pos.Position.Z.ToString(CultureInfo.InvariantCulture),
             };
         }
     }
