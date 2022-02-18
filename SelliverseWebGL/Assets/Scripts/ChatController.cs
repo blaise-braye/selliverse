@@ -15,6 +15,8 @@ public class ChatController : MonoBehaviour
     }
 
     public bool isChatting = false;
+
+
     GameManager gameManager;
 
     EventSystem eventSystem;
@@ -50,7 +52,6 @@ public class ChatController : MonoBehaviour
             {
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
-                    Debug.Log("RETURN");
                     eventSystem.SetSelectedGameObject(chatBox.gameObject);
                     isChatting = true;
                 }
@@ -67,7 +68,11 @@ public class ChatController : MonoBehaviour
                                 content = chatBox.text
                             });
                         chatBox.text = "";
+                        isChatting = false;
                     }
+                }
+                if(Input.GetKeyDown(KeyCode.Escape))
+                {
                     isChatting = false;
                 }
             }
