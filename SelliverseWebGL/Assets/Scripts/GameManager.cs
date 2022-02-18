@@ -53,6 +53,7 @@ public class GameManager : MonoBehaviour
         var uri = UseLocal ? "wss://localhost:5001" : "wss://selliverse.azurewebsites.net/";
         websocket = new WebSocket(uri);
         players = new Dictionary<string, GameObject>();
+
         Debug.Log("connecting to " + uri);
 
         websocket.OnOpen += () =>
@@ -132,6 +133,9 @@ public class GameManager : MonoBehaviour
             case "chat":
                 HandleChat(json);
                 break;
+            case "movement":
+                HandleMovement(json);
+                break;
             default:
                 break;
         }
@@ -153,6 +157,11 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("Already a player with that name");
         }
+    }
+
+    public void HandleMovement(string json)
+    {
+        Debug.Log("Got some movement");
     }
 
     class ChatMessage : RootMessage
