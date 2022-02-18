@@ -148,17 +148,24 @@ namespace Selliverse.Server.Actors
                 //    });
                 //}
 
-                foreach (var (id, player) in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
+                
+
+                foreach (var (id, otherPlayer) in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (this.playerStates.TryGetValue(id, out PlayerState otherPlayer))
+                    if (this.playerStates.TryGetValue(id, out PlayerState otherPlayerState))
                     {
-                        if (otherPlayer.GameState == GameState.InGame)
+                        if (otherPlayerState.GameState == GameState.InGame)
                         {
-                            await player.SendItRight(new PlayerEnteredGameMessage()
+                            await otherPlayer.SendItRight(new PlayerEnteredGameMessage()
+                            {
+                                Id = msg.Id,
+                                Name = msg.Name
+                                
+                            });
+                            await this.playerConnections[msg.Id].SendItRight(new PlayerEnteredGameMessage()
                             {
                                 Id = id,
-                                Name = otherPlayer.Name,
-                                Type = "entered"
+                                Name = otherPlayerState.Name,
                             });
                         }
                     }
