@@ -147,6 +147,9 @@ public class GameManager : MonoBehaviour
             case "rotation":
                 HandleRotation(json);
                 break;
+            case "left":
+                HandleLeft(json);
+                break;
             default:
                 break;
         }
@@ -169,6 +172,17 @@ public class GameManager : MonoBehaviour
             this.state = GameState.Lobby;
             Debug.Log("Already a player with that name");
             lobby.SetActive(true);
+        }
+    }
+
+    public void HandleLeft(string json)
+    {
+        var leftMsg = JsonUtility.FromJson<LeftMessage>(json);
+
+        if(this.players.TryGetValue(leftMsg.id, out GameObject go))
+        {
+            this.players.Remove(leftMsg.id);
+            Destroy(go);
         }
     }
 
@@ -239,5 +253,12 @@ public class GameManager : MonoBehaviour
         public string id;
 
         public string x;
+    }
+
+    class LeftMessage
+    {
+        public string type = "left";
+
+        public string id;
     }
 }
