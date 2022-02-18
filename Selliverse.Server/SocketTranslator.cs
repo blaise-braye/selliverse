@@ -4,6 +4,7 @@ using Selliverse.Server.Messages;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.WebSockets;
 using System.Text.Json;
 
@@ -71,7 +72,16 @@ namespace Selliverse.Server
                     return new MovementMessage()
                     {
                         Id = id,
-                        Position = new System.Numerics.Vector3(float.Parse(input["x"]), float.Parse(input["y"]), float.Parse(input["z"]))
+                        Position = new System.Numerics.Vector3(
+                            float.Parse(input["x"], CultureInfo.InvariantCulture), 
+                            float.Parse(input["y"], CultureInfo.InvariantCulture), 
+                            float.Parse(input["z"], CultureInfo.InvariantCulture))
+                    };
+                case "rotation":
+                    return new RotationMessage()
+                    {
+                        Id = id,
+                        X = float.Parse(input["x"], CultureInfo.InvariantCulture)
                     };
                 default:
                     return null;
