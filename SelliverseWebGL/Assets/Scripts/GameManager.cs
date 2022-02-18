@@ -24,8 +24,6 @@ public class GameManager : MonoBehaviour
     class WelcomeMessage : RootMessage
     {
         public bool isWelcome;
-
-        public ChatMessage[] LastMessages;
     }
 
     class EnterMessage
@@ -50,8 +48,9 @@ public class GameManager : MonoBehaviour
         this.state = GameState.Lobby;
         nameField = GameObject.Find("NameField").GetComponent<InputField>();
         chatController = GameObject.Find("HUD").GetComponent<ChatController>();
-
-        websocket = new WebSocket(UseLocal ? "wss://localhost:5001" : "wss://selliverse.azurewebsites.net/");
+        var uri = UseLocal ? "wss://localhost:5001" : "wss://selliverse.azurewebsites.net/";
+        websocket = new WebSocket(uri);
+        Debug.Log("connecting to " + uri);
         // websocketConnection = this.GetComponent<WebSocketConnection>();
         // websocketConnection = new WebSocketConnection();
         // websocketConnection.Start();
@@ -130,8 +129,7 @@ public class GameManager : MonoBehaviour
 
         var rootmsg = JsonUtility.FromJson<RootMessage>(json);
 
-        Debug.Log("Got a '" + rootmsg.type + "' from the server");
-
+        Debug.Log("Got a '" + rootmsg.type + "' from the server : " + json);
         switch (rootmsg.type)
         {
             case "welcome":
@@ -156,10 +154,6 @@ public class GameManager : MonoBehaviour
             Debug.Log("Welcome to the game!");
             var lobby = GameObject.Find("Lobby");
             lobby.SetActive(false);
-            foreach(var message in welcomeMsg.LastMessages)
-            {
-                chatController.AddChat(message.name, message.content);
-            }
         }
         else
         {
