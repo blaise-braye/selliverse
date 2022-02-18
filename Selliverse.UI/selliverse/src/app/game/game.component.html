@@ -3,8 +3,11 @@
     <p class="flex-grow px-5" *ngIf="showAccelerationBanner === '1'">
       If the game feels chunky, make sure your hardware acceleration is enabled. <a
       href="https://blog.colonist.io/how-to-enable-webgl/" class="underline">Read
-      more</a> <br />
-      Use the arrow keys to move around in this magical world.
+      more</a>. <small class="text-xs">(it's <span class="underline">definitely</span> not an issue with the application)</small> <br />
+      Use the <strong class="animate__animated animate__slideInLeft">arrow</strong> keys to <strong>move</strong>. <br />
+      Use the <strong>enter</strong> key to <strong>chat</strong>. <br />
+
+      Use the <strong>/meet *playerName*</strong> command to <strong>entangle</strong>.
     </p>
     <p class="px-5 text-right hover:cursor-pointer" (click)="hideMessage()" *ngIf="showAccelerationBanner === '1'">X</p>
   </div>

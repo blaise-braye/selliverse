@@ -7,6 +7,7 @@ namespace Selliverse.Server.Actors
     using Serilog;
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Net.WebSockets;
     using System.Numerics;
@@ -34,6 +35,7 @@ namespace Selliverse.Server.Actors
             this.Receive<PlayerConnectedMessage>(this.HandlePlayerConnected);
             this.ReceiveAsync<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
+            this.ReceiveAsync<CommandMessage>(this.HandleCommand);
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
             this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
             this.Receive<MovementMessage>(this.HandleMovement);
@@ -76,6 +78,21 @@ namespace Selliverse.Server.Actors
             }
         }
 
+        private async Task SendMoveCommand(PlayerState sender, string receiver)
+        {
+            var moveMessage = new MoveMessage
+            {
+                x = sender.Position.X.ToString(CultureInfo.InvariantCulture),
+                y = (sender.Position.Y + 8f).ToString(CultureInfo.InvariantCulture),
+                z = sender.Position.Z.ToString(CultureInfo.InvariantCulture)
+            };
+
+            if (this.playerConnections.TryGetValue(receiver, out var connection))
+            {
+                await connection.SendItRight(moveMessage);
+            }
+        }
+
         private async Task HandleMovementToGame(MovementToGameMessage msg)
         {
             await BroadCastToOthers(msg.Id, msg);
@@ -98,6 +115,28 @@ namespace Selliverse.Server.Actors
             this.playerStates.Remove(msg.Id);
 
             await BroadCastToOthers(msg.Id, msg);
+        }
+
+        private async Task HandleCommand(CommandMessage msg)
+        {
+            Log.Information("{id}: {content}", msg.Id, msg.Content);
+            // look up the name
+            if (this.playerStates.TryGetValue(msg.Id, out var sender))
+            {
+                var message = msg.Content.Split(' ');
+                if (message.Length == 2)
+                {
+                    if(message[0].Equals("meet", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var target = this.playerStates.Where(x => x.Value.Name.Equals(message[1], StringComparison.OrdinalIgnoreCase));
+                        if (target.Any())
+                        {
+                            await SendMoveCommand(sender, target.First().Key);
+                        }
+                    }
+                }
+                Log.Information("Command received by {id}", msg.Id);
+            }
         }
 
         private async Task HandleChat(ChatMessage msg)
