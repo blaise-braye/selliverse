@@ -55,7 +55,12 @@
      <Compile Include="Assets\Scripts\WebSocketConnection.cs" />
      <Compile Include="Assets\Scripts\HideByDefault.cs" />
      <Compile Include="Assets\Scripts\ChatController.cs" />
+     <Compile Include="Assets\LowPolyWater_Pack\Scripts\LowPolyWater.cs" />
+     <Compile Include="Assets\LowPolyWater_Pack\Scripts\Editor\GeneratePlane.cs" />
      <None Include="Assets\endel.nativewebsocket.asmdef" />
+     <None Include="Assets\LowPolyWater_Pack\Shaders\WaterShaded.shader" />
+     <None Include="Assets\LowPolyWater_Pack\LowPoly Island\Credits.txt" />
+     <None Include="Assets\BrokenVector\LowPolyTreePack\README.txt" />
  <Reference Include="UnityEngine">
  <HintPath>C:/Program Files/Unity/Hub/Editor/2020.3.28f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
  </Reference>
