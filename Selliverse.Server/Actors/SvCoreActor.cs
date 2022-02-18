@@ -72,7 +72,7 @@ namespace Selliverse.Server.Actors
             }
         }
 
-        private async Task HandlePlayerConnected(PlayerConnectedMessage msg)
+        private void HandlePlayerConnected(PlayerConnectedMessage msg)
         {
             Log.Information("New player {id}", msg.Id);
             this.playerConnections.Add(msg.Id, msg.WebSocket);
@@ -113,7 +113,6 @@ namespace Selliverse.Server.Actors
             }
             
         }
-
 
         private async Task HandlePlayerEnteredGame(PlayerEnteredGameMessage msg)
         {
