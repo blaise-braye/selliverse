@@ -9,12 +9,15 @@ namespace Selliverse.Server.Actors
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.WebSockets;
+    using System.Numerics;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
 
     public class SvCoreActor : ReceiveActor
     {
+        public const int CHAT_DISTANCE = 10;
+
         private Dictionary<string, WebSocket> playerConnections = new Dictionary<string, WebSocket>();
 
         private Dictionary<string, PlayerState> playerStates = new Dictionary<string, PlayerState>();
@@ -48,6 +51,24 @@ namespace Selliverse.Server.Actors
             foreach (var (_, socket) in playerConnections)
             {
                 await socket.SendItRight(message);
+            }
+        }
+
+        private async Task BroadcastChat(ChatMessage message, PlayerState sender)
+        {
+            var senderPos = sender.Position;
+            foreach (var player in playerStates.Where(pc => !string.Equals(sender.Name, pc.Value.Name, StringComparison.OrdinalIgnoreCase)))
+            {
+                // calculate distance
+                var distance = Vector3.Distance(player.Value.Position, senderPos);
+
+                if (distance < CHAT_DISTANCE)
+                {
+                    if (this.playerConnections.TryGetValue(player.Key, out var receiver))
+                    {
+                        await receiver.SendItRight(message);
+                    }
+                }
             }
         }
 
@@ -88,7 +109,7 @@ namespace Selliverse.Server.Actors
 
                 lastMessages.Enqueue(chatMessage);
 
-                await BroadCastToAll(msg.Id, chatMessage);
+                await BroadcastChat(chatMessage, sender);
             }
             
         }
@@ -119,7 +140,9 @@ namespace Selliverse.Server.Actors
                     await this.playerConnections[msg.Id].SendItRight(message);
                 }
 
-                foreach(var player in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
+                await BroadCastToOthers(msg.Id, msg);
+
+                foreach (var player in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
                 {
                     await player.Value.SendItRight(new ChatMessage()
                     {
@@ -128,7 +151,7 @@ namespace Selliverse.Server.Actors
                     });
                 }
 
-                await BroadCastToOthers(msg.Id, msg);
+                
             }
         }
 
