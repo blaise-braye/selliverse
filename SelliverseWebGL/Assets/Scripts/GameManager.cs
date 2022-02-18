@@ -221,7 +221,11 @@ public class GameManager : MonoBehaviour
         var rotMsg = JsonUtility.FromJson<RotationMessage>(json);
         if(this.players.TryGetValue(rotMsg.id, out GameObject go))
         {
-            go.gameObject.transform.rotation = Quaternion.Euler(float.Parse(rotMsg.x, CultureInfo.InvariantCulture), 0.0f, 0.0f);
+            go.gameObject.transform.rotation = 
+                Quaternion.Euler(
+                    0.0f,
+                    float.Parse(rotMsg.x, CultureInfo.InvariantCulture) + 90f,  
+                    0.0f);
             // go.gameObject.transform.Rotate(Vector3.up * ((float.Parse(rotMsg.x, CultureInfo.InvariantCulture) + (Mathf.PI / 4.0f)) ));
         }
     }
