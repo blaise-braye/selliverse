@@ -119,6 +119,15 @@ namespace Selliverse.Server.Actors
                     await this.playerConnections[msg.Id].SendItRight(message);
                 }
 
+                foreach(var player in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
+                {
+                    await player.Value.SendItRight(new ChatMessage()
+                    {
+                        Content = $"Player {msg.Name} has entered the Selliverse",
+                        Name = msg.Name
+                    });
+                }
+
                 await BroadCastToOthers(msg.Id, msg);
             }
         }
