@@ -32,12 +32,13 @@ namespace Selliverse.Server.Actors
             throttleActor = Context.ActorOf(throttleProps, "svThrottle");
 
             this.Receive<PlayerConnectedMessage>(this.HandlePlayerConnected);
-            this.Receive<PlayerLeftMessage>(this.HandlePlayerLeft);
+            this.ReceiveAsync<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
             this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
             this.Receive<MovementMessage>(this.HandleMovement);
             this.ReceiveAsync<MovementToGameMessage>(this.HandleMovementToGame);
+            this.ReceiveAsync<RotationMessage>(this.HandleRotation);
         }
 
 
@@ -90,11 +91,13 @@ namespace Selliverse.Server.Actors
             });
         }
 
-        private void HandlePlayerLeft(PlayerLeftMessage msg)
+        private async Task HandlePlayerLeft(PlayerLeftMessage msg)
         {
             Log.Information("Player {id} left", msg.Id);
             this.playerConnections.Remove(msg.Id);
             this.playerStates.Remove(msg.Id);
+
+            await BroadCastToOthers(msg.Id, msg);
         }
 
         private async Task HandleChat(ChatMessage msg)
@@ -124,7 +127,7 @@ namespace Selliverse.Server.Actors
 
         private async Task HandleRotation(RotationMessage msg)
         {
-
+            await BroadCastToOthers(msg.Id, msg);
         }
 
         private async Task HandlePlayerEnteredGame(PlayerEnteredGameMessage msg)
