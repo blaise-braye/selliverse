@@ -19,6 +19,8 @@ namespace Selliverse.Server.Actors
 
         private Dictionary<string, PlayerState> playerStates = new Dictionary<string, PlayerState>();
 
+        private Queue<ChatMessage> lastMessages = new Queue<ChatMessage>();
+
         public readonly IActorRef throttleActor;
 
         public SvCoreActor(IActorRef throttleActor)
@@ -65,19 +67,28 @@ namespace Selliverse.Server.Actors
             this.playerConnections.Remove(msg.Id);
             this.playerStates.Remove(msg.Id);
         }
-
+        
         private async Task HandleChat(ChatMessage msg)
         {
             Log.Information("{id}: {content}", msg.Id, msg.Content);
             // look up the name
             if(this.playerStates.TryGetValue(msg.Id, out var sender))
             {
-                await BroadCastToAll(msg.Id, new ChatMessage()
+                if (lastMessages.Count > 4)
+                {
+                    lastMessages.Dequeue();
+                }
+
+                var chatMessage = new ChatMessage()
                 {
                     Content = msg.Content,
                     Name = sender.Name,
                     Id = msg.Id
-                });
+                };
+
+                lastMessages.Enqueue(chatMessage);
+
+                await BroadCastToAll(msg.Id, chatMessage);
             }
             
         }
@@ -91,7 +102,8 @@ namespace Selliverse.Server.Actors
                 // not allowed
                 await this.playerConnections[msg.Id].SendItRight(new PlayerWelcomeMessage()
                 {
-                    IsWelcome = false
+                    IsWelcome = false,
+                    LastMessages = lastMessages.ToArray()
                 });
             }
             else

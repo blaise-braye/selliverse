@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour
     class WelcomeMessage : RootMessage
     {
         public bool isWelcome;
+
+        public ChatMessage[] LastMessages;
     }
 
     class EnterMessage
@@ -39,7 +41,7 @@ public class GameManager : MonoBehaviour
 
     WebSocket websocket;
     InputField nameField;
-    
+
     public ChatController chatController;
 
     // Start is called before the first frame update
@@ -54,7 +56,7 @@ public class GameManager : MonoBehaviour
         // websocketConnection = new WebSocketConnection();
         // websocketConnection.Start();
         // websocketConnection.AddHandler(handleIncomingMessage);
-        
+
         // {
         //     // Reading a plain text message
         //     var message = System.Text.Encoding.UTF8.GetString(bytes);
@@ -68,7 +70,7 @@ public class GameManager : MonoBehaviour
         websocket.OnError += (e) =>
         {
             Debug.Log("Error! " + e);
-            
+
         };
 
         websocket.OnClose += (e) =>
@@ -82,7 +84,7 @@ public class GameManager : MonoBehaviour
 
     }
 
-   
+
 
     // Update is called once per frame
     void Update()
@@ -125,9 +127,9 @@ public class GameManager : MonoBehaviour
     {
         var json = Encoding.UTF8.GetString(data);
         Debug.Log(json);
-    
+
         var rootmsg = JsonUtility.FromJson<RootMessage>(json);
-    
+
         Debug.Log("Got a '" + rootmsg.type + "' from the server");
 
         switch (rootmsg.type)
@@ -154,7 +156,10 @@ public class GameManager : MonoBehaviour
             Debug.Log("Welcome to the game!");
             var lobby = GameObject.Find("Lobby");
             lobby.SetActive(false);
-            
+            foreach(var message in welcomeMsg.LastMessages)
+            {
+                chatController.AddChat(message.name, message.content);
+            }
         }
         else
         {
@@ -174,6 +179,6 @@ public class GameManager : MonoBehaviour
         var chatMsg = JsonUtility.FromJson<ChatMessage>(json);
 
         chatController.AddChat(chatMsg.name, chatMsg.content);
-    }   
+    }
 
 }

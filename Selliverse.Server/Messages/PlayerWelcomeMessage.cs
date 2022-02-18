@@ -5,5 +5,7 @@
         public string Type { get; set; } = "welcome";
 
         public bool IsWelcome { get; set; }
+
+        public ChatMessage[] LastMessages { get; set; }
     }
 }
