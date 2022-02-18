@@ -48,14 +48,14 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\PlayerMovement.cs" />
+     <Compile Include="Assets\Scripts\HideByDefault.cs" />
+     <Compile Include="Assets\LowPolyWater_Pack\Scripts\LowPolyWater.cs" />
      <Compile Include="Assets\Scripts\Chat\ChatBehaviour.cs" />
+     <Compile Include="Assets\Scripts\ChatController.cs" />
      <Compile Include="Assets\Scripts\MouseLook.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
      <Compile Include="Assets\WebSocket.cs" />
      <Compile Include="Assets\Scripts\WebSocketConnection.cs" />
-     <Compile Include="Assets\Scripts\HideByDefault.cs" />
-     <Compile Include="Assets\Scripts\ChatController.cs" />
-     <Compile Include="Assets\LowPolyWater_Pack\Scripts\LowPolyWater.cs" />
      <None Include="Assets\endel.nativewebsocket.asmdef" />
      <None Include="Assets\LowPolyWater_Pack\Shaders\WaterShaded.shader" />
      <None Include="Assets\LowPolyWater_Pack\LowPoly Island\Credits.txt" />
