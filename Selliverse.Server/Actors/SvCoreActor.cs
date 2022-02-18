@@ -122,6 +122,11 @@ namespace Selliverse.Server.Actors
 
         }
 
+        private async Task HandleRotation(RotationMessage msg)
+        {
+
+        }
+
         private async Task HandlePlayerEnteredGame(PlayerEnteredGameMessage msg)
         {
             Log.Information("Getting a new player entered!");
@@ -147,16 +152,6 @@ namespace Selliverse.Server.Actors
                     await this.playerConnections[msg.Id].SendItRight(message);
                 }
 
-                //foreach(var player in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
-                //{
-                //    await player.Value.SendItRight(new ChatMessage()
-                //    {
-                //        Content = $"Player {msg.Name} has entered the Selliverse",
-                //        Name = msg.Name
-                //    });
-                //}
-
-                
 
                 foreach (var (id, otherPlayer) in this.playerConnections.Where(pc => !string.Equals(pc.Key, msg.Id, StringComparison.OrdinalIgnoreCase)))
                 {
