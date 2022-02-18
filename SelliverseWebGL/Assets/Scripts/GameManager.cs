@@ -125,7 +125,7 @@ public class GameManager : MonoBehaviour
     public void HandleMessage(byte[] data)
     {
         var json = Encoding.UTF8.GetString(data);
-        Debug.Log(json);
+        // Debug.Log(json);
 
         var rootmsg = JsonUtility.FromJson<RootMessage>(json);
 
@@ -189,7 +189,6 @@ public class GameManager : MonoBehaviour
 
     public void HandleMovement(string json)
     {
-        Debug.Log("Got some movement " + json);
         var moveMsg = JsonUtility.FromJson<MovementMessage>(json);
 
         if(this.players.TryGetValue(moveMsg.id, out GameObject go))
