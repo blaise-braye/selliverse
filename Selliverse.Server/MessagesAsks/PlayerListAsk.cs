@@ -7,6 +7,6 @@
 
     public class PlayerListResponse
     {
-        public string[] Players { get; set; }
+        public ConnectedPlayer[] Players { get; set; }
     }
 }
