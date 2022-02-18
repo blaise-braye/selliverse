@@ -154,16 +154,18 @@ public class GameManager : MonoBehaviour
     {
         var welcomeMsg = JsonUtility.FromJson<WelcomeMessage>(json);
 
+        var lobby = GameObject.Find("Lobby");
         if(welcomeMsg.isWelcome)
         {
             this.state = GameState.InGame;
             Debug.Log("Welcome to the game!");
-            var lobby = GameObject.Find("Lobby");
             lobby.SetActive(false);
         }
         else
         {
+            this.state = GameState.Lobby;
             Debug.Log("Already a player with that name");
+            lobby.SetActive(true);
         }
     }
 
