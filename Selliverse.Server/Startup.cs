@@ -19,10 +19,8 @@ namespace Selliverse.Server
         public void ConfigureServices(IServiceCollection services)
         {
             var system = ActorSystem.Create("selliverse");
-            var throttleProps = Props.Create<SvThrottledBroadcastActor>();
-            var throttleActor = system.ActorOf(throttleProps, "svThrottle");
-
-            var props = Props.Create<SvCoreActor>(() => new SvCoreActor(throttleActor));
+    
+            var props = Props.Create<SvCoreActor>(() => new SvCoreActor());
             var actor = system.ActorOf(props, "svCore");
             services.AddSingleton(actor);
             

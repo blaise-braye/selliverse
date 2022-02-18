@@ -38,13 +38,16 @@
     public class SvThrottledBroadcastActor : ReceiveActor
     {
         private Dictionary<string, ThrottledPosition> latestPlayerPositions = new Dictionary<string, ThrottledPosition>();
-        private Dictionary<string, WebSocket> playerConnections = new Dictionary<string, WebSocket>();
 
-        public SvThrottledBroadcastActor()
+        private readonly IActorRef _daddy;
+
+        public SvThrottledBroadcastActor(IActorRef daddyActor)
         {
+            this._daddy = daddyActor;
             Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.Zero, TimeSpan.FromMilliseconds(100), Self, new SendThrottledPositionsMessage(), Self);
             this.Receive<MovementMessage>(this.HandleMovement);
             this.ReceiveAsync<SendThrottledPositionsMessage>(this.HandleSendThrottledPositionsMessage);
+            
         }
 
         private async Task HandleSendThrottledPositionsMessage(SendThrottledPositionsMessage throttled)
@@ -53,10 +56,7 @@
             {
                 var msg = MovementToGameMessage.FromPos(pair.Key, pair.Value);
 
-                foreach (var (_, socket) in playerConnections.Where(kvp => !kvp.Key.Equals(pair.Key, System.StringComparison.Ordinal)))
-                {
-                    await socket.SendItRight(msg);
-                }
+                this._daddy.Tell(msg);
             }
 
             this.latestPlayerPositions.Clear();

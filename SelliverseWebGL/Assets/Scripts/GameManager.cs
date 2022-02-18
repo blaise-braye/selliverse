@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour
 
     Dictionary<string, GameObject> players;
 
+    GameObject selliFab;
     public ChatController chatController;
 
     // Start is called before the first frame update
@@ -52,6 +53,7 @@ public class GameManager : MonoBehaviour
         this.state = GameState.Lobby;
         nameField = GameObject.Find("NameField").GetComponent<InputField>();
         chatController = GameObject.Find("HUD").GetComponent<ChatController>();
+        selliFab = GameObject.Find("SelliFab");
         var uri = UseLocal ? "wss://localhost:5001" : "wss://selliverse.azurewebsites.net/";
         websocket = new WebSocket(uri);
         players = new Dictionary<string, GameObject>();
@@ -169,12 +171,25 @@ public class GameManager : MonoBehaviour
         Debug.Log("Got some movement " + json);
         var moveMsg = JsonUtility.FromJson<MovementMessage>(json);
 
+        if(this.players.TryGetValue(moveMsg.id, out GameObject go))
+        {
+            var location = new Vector3(
+                float.Parse(moveMsg.x),
+                float.Parse(moveMsg.y),
+                float.Parse(moveMsg.z)
+            );
+
+            go.transform.position = location;
+        }
     }
 
     public void HandleEntered(string json)
     {
         Debug.Log("Someone entered " + json);
-        var moveMsg = JsonUtility.FromJson<EnterMessage>(json);
+        var enterMsg = JsonUtility.FromJson<EnterMessage>(json);
+
+        GameObject childGameObject = Instantiate(selliFab, new Vector3(-55f, 5f, -50f), Quaternion.identity);
+        this.players.Add(enterMsg.id, childGameObject);
     }
 
     class ChatMessage : RootMessage
@@ -193,7 +208,7 @@ public class GameManager : MonoBehaviour
 
     class MovementMessage : RootMessage
     {
-
+        public string id;
         public string x;
 
         public string y;

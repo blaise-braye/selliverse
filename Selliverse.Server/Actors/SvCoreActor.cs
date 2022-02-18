@@ -26,15 +26,18 @@ namespace Selliverse.Server.Actors
 
         public readonly IActorRef throttleActor;
 
-        public SvCoreActor(IActorRef throttleActor)
+        public SvCoreActor()
         {
+            var throttleProps = Props.Create<SvThrottledBroadcastActor>(() => new SvThrottledBroadcastActor(Self));
+            throttleActor = Context.ActorOf(throttleProps, "svThrottle");
+
             this.Receive<PlayerConnectedMessage>(this.HandlePlayerConnected);
             this.Receive<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
             this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
             this.Receive<MovementMessage>(this.HandleMovement);
-            this.throttleActor = throttleActor;
+            this.ReceiveAsync<MovementToGameMessage>(this.HandleMovementToGame);
         }
 
 
@@ -70,6 +73,11 @@ namespace Selliverse.Server.Actors
                     }
                 }
             }
+        }
+
+        private async Task HandleMovementToGame(MovementToGameMessage msg)
+        {
+            await BroadCastToOthers(msg.Id, msg);
         }
 
         private void HandlePlayerConnected(PlayerConnectedMessage msg)
