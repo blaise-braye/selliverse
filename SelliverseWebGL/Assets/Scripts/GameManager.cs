@@ -144,6 +144,12 @@ public class GameManager : MonoBehaviour
             case "entered":
                 HandleEntered(json);
                 break;
+            case "rotation":
+                HandleRotation(json);
+                break;
+            case "left":
+                HandleLeft(json);
+                break;
             default:
                 break;
         }
@@ -169,6 +175,17 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void HandleLeft(string json)
+    {
+        var leftMsg = JsonUtility.FromJson<LeftMessage>(json);
+
+        if(this.players.TryGetValue(leftMsg.id, out GameObject go))
+        {
+            this.players.Remove(leftMsg.id);
+            Destroy(go);
+        }
+    }
+
     public void HandleMovement(string json)
     {
         Debug.Log("Got some movement " + json);
@@ -186,12 +203,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    
+    public void HandleRotation(string json)
+    {
+        var rotMsg = JsonUtility.FromJson<RotationMessage>(json);
+        if(this.players.TryGetValue(rotMsg.id, out GameObject go))
+        {
+            go.gameObject.transform.rotation = Quaternion.identity;
+            go.gameObject.transform.Rotate(Vector3.up * float.Parse(rotMsg.x, CultureInfo.InvariantCulture));
+        }
+    }
+
+
     public void HandleEntered(string json)
     {
         Debug.Log("Someone entered " + json);
         var enterMsg = JsonUtility.FromJson<EnterMessage>(json);
 
         GameObject childGameObject = Instantiate(selliFab, new Vector3(-55f, 5f, -50f), Quaternion.identity);
+        var text = childGameObject.GetComponentInChildren<TextMesh>();
+        text.text = enterMsg.name;
         this.players.Add(enterMsg.id, childGameObject);
     }
 
@@ -219,4 +250,17 @@ public class GameManager : MonoBehaviour
         public string z;
     }
 
+    class RotationMessage : RootMessage
+    {
+        public string id;
+
+        public string x;
+    }
+
+    class LeftMessage
+    {
+        public string type = "left";
+
+        public string id;
+    }
 }
