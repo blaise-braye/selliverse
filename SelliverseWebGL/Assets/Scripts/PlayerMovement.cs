@@ -57,7 +57,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (teleport)
         {
-            transform.position = newPosition;
+            controller.transform.position = newPosition;
             teleport = false;
         }
     }
