@@ -77,21 +77,25 @@ public class ChatController : MonoBehaviour
 
                         Debug.Log("Chatting :" + chatBox.text);
 
-                        if (chatBox.text.StartsWith("/"))
+                        //if (chatBox.text.StartsWith("/"))
+                        //{
+                        //    Debug.Log("Command :" + chatBox.text);
+                        //    gameManager.EmitMessage(new CommandMessage()
+                        //    {
+                        //        content = chatBox.text.Substring(1)
+                        //    });
+                        //}
+                        //else
+                        //{
+                        //    gameManager.EmitMessage(new ChatMessage()
+                        //    {
+                        //        content = chatBox.text
+                        //    });
+                        //}
+                        gameManager.EmitMessage(new ChatMessage()
                         {
-                            Debug.Log("Command :" + chatBox.text);
-                            gameManager.EmitMessage(new CommandMessage()
-                            {
-                                content = chatBox.text.Substring(1)
-                            });
-                        }
-                        else
-                        {
-                            gameManager.EmitMessage(new ChatMessage()
-                            {
-                                content = chatBox.text
-                            });
-                        }
+                            content = chatBox.text
+                        });
                         chatBox.text = "";
                         isChatting = false;
                     }
