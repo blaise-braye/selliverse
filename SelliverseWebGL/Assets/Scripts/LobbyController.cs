@@ -26,7 +26,6 @@ public class LobbyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(gameManager.state);
         if(gameManager.state == GameState.Lobby)
         {
             if (Input.GetKeyDown(KeyCode.Return))
