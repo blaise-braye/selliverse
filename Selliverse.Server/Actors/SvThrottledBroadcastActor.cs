@@ -12,6 +12,28 @@
     using System.Threading;
     using System.Threading.Tasks;
 
+    public class MovementToGameMessage
+    {
+        public String Type { get; set; } = "movement";
+        public String Id { get; set; }
+
+        public String X { get; set; }
+        public String Y { get; set; }
+
+        public String Z { get; set; }
+
+        public static MovementToGameMessage FromPos(String id, ThrottledPosition pos)
+        {
+            return new MovementToGameMessage()
+            {
+                Id = id,
+                X = pos.Position.X.ToString(),
+                Y = pos.Position.Y.ToString(),
+                Z = pos.Position.Z.ToString(),
+            };
+        }
+    }
+
     public class SvThrottledBroadcastActor : ReceiveActor
     {
         private Dictionary<string, ThrottledPosition> latestPlayerPositions = new Dictionary<string, ThrottledPosition>();
@@ -28,11 +50,11 @@
         {
             foreach (var pair in this.latestPlayerPositions.Where(lp => lp.Value.HasUpdated))
             {
-                var body = new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(pair.Value));
-                Log.Information("Player {id} at POS: {pos}", pair.Key, pair.Value.Position);
+                var msg = MovementToGameMessage.FromPos(pair.Key, pair.Value);
+
                 foreach (var (_, socket) in playerConnections.Where(kvp => !kvp.Key.Equals(pair.Key, System.StringComparison.Ordinal)))
                 {
-                    await socket.SendAsync(body, WebSocketMessageType.Text, true, CancellationToken.None);
+                    await socket.SendItRight(msg);
                 }
             }
 
