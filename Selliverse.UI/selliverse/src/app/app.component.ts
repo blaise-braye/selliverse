@@ -12,7 +12,7 @@ export class AppComponent {
   isLoaded$ = new Observable<boolean>().pipe(startWith(false), delay(4000), mapTo(true))
 
   connect() {
-    alert('cmon guys, work harder!')
+    window.location.href = '/game';
   }
 }
 
