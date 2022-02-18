@@ -25,8 +25,8 @@ namespace Selliverse.Server.Actors
 
         public SvCoreActor(IActorRef throttleActor)
         {
-            this.ReceiveAsync<PlayerConnectedMessage>(this.HandlePlayerConnected);
-            this.ReceiveAsync<PlayerLeftMessage>(this.HandlePlayerLeft);
+            this.Receive<PlayerConnectedMessage>(this.HandlePlayerConnected);
+            this.Receive<PlayerLeftMessage>(this.HandlePlayerLeft);
             this.ReceiveAsync<ChatMessage>(this.HandleChat);
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
             this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
@@ -51,7 +51,7 @@ namespace Selliverse.Server.Actors
             }
         }
 
-        private async Task HandlePlayerConnected(PlayerConnectedMessage msg)
+        private void HandlePlayerConnected(PlayerConnectedMessage msg)
         {
             Log.Information("New player {id}", msg.Id);
             this.playerConnections.Add(msg.Id, msg.WebSocket);
@@ -61,7 +61,7 @@ namespace Selliverse.Server.Actors
             });
         }
 
-        private async Task HandlePlayerLeft(PlayerLeftMessage msg)
+        private void HandlePlayerLeft(PlayerLeftMessage msg)
         {
             Log.Information("Player {id} left", msg.Id);
             this.playerConnections.Remove(msg.Id);
