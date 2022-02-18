@@ -16,7 +16,7 @@ namespace Selliverse.Server.Actors
 
     public class SvCoreActor : ReceiveActor
     {
-        public const int CHAT_DISTANCE = 10;
+        public const int CHAT_DISTANCE = 1000;
 
         private Dictionary<string, WebSocket> playerConnections = new Dictionary<string, WebSocket>();
 
@@ -57,7 +57,7 @@ namespace Selliverse.Server.Actors
         private async Task BroadcastChat(ChatMessage message, PlayerState sender)
         {
             var senderPos = sender.Position;
-            foreach (var player in playerStates.Where(pc => !string.Equals(sender.Name, pc.Value.Name, StringComparison.OrdinalIgnoreCase)))
+            foreach (var player in playerStates)
             {
                 // calculate distance
                 var distance = Vector3.Distance(player.Value.Position, senderPos);
