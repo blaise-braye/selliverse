@@ -56,6 +56,7 @@
      <Compile Include="Assets\WebSocket.cs" />
      <Compile Include="Assets\Scripts\WebSocketConnection.cs" />
      <Compile Include="Assets\Scripts\LobbyController.cs" />
+     <Compile Include="Assets\Scripts\LookAtCamera.cs" />
      <None Include="Assets\BOXOPHOBIC\Skybox Cubemap Extended\Core\Shaders\Skybox Cubemap Extended.shader" />
      <None Include="Assets\endel.nativewebsocket.asmdef" />
      <None Include="Assets\LowPolyWater_Pack\Shaders\WaterShaded.shader" />

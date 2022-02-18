@@ -68,7 +68,7 @@ public class PlayerMovement : MonoBehaviour
 
         if(!gameManager.chatController.isChatting && Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            Debug.Log("JUMP!!");
+            
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
@@ -78,7 +78,7 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
 
 
-        if(Vector3.Distance(oldPosition, controller.transform.position) > 0.01f)
+        // if(Vector3.Distance(oldPosition, controller.transform.position) > 0.01f)
         {
             var msg = new MovementMessage()
             {
