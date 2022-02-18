@@ -162,6 +162,8 @@ public class GameManager : MonoBehaviour
     public void HandleMovement(string json)
     {
         Debug.Log("Got some movement");
+        var moveMsg = JsonUtility.FromJson<MovementMessage>(json);
+        
     }
 
     class ChatMessage : RootMessage
@@ -176,6 +178,16 @@ public class GameManager : MonoBehaviour
         var chatMsg = JsonUtility.FromJson<ChatMessage>(json);
 
         chatController.AddChat(chatMsg.name, chatMsg.content);
+    }
+
+    class MovementMessage : RootMessage
+    {
+
+        public string x;
+
+        public string y;
+
+        public string z;
     }
 
 }
