@@ -44,11 +44,23 @@ namespace Selliverse.Server.Actors
         }
 
 
-        private async Task BroadCastToOthers(string id, object message)
+        private async Task BroadCastToOthers(string id, object message, int timeout = 100)
         {
-            foreach (var (_, socket) in playerConnections.Where(kvp => !kvp.Key.Equals(id, System.StringComparison.Ordinal)))
+            foreach (var (socketId, socket) in playerConnections.Where(kvp => !kvp.Key.Equals(id, System.StringComparison.Ordinal)))
             {
-                await socket.SendItRight(message);
+                try
+                {
+                    var tokensource = new CancellationTokenSource(timeout);
+                    await socket.SendItRight(message, tokensource.Token);
+                }
+                catch (OperationCanceledException cancelled) 
+                {
+                    Log.Information("operation cancelled {id} took too long to respond", socketId);
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
         }
 
@@ -95,7 +107,7 @@ namespace Selliverse.Server.Actors
 
         private async Task HandleMovementToGame(MovementToGameMessage msg)
         {
-            await BroadCastToOthers(msg.Id, msg);
+            await BroadCastToOthers(msg.Id, msg, 5);
         }
 
         private void HandlePlayerConnected(PlayerConnectedMessage msg)
