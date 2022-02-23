@@ -1,69 +1,68 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
-public class MouseLook : MonoBehaviour
+namespace Assets.Scripts
 {
-    class RotationMessage
+    public class MouseLook : MonoBehaviour
     {
-        public string type = "rotation";
+        class RotationMessage
+        {
+            public string type = "rotation";
 
-        public string x;
-    }
-    public float mouseSensitivity = 100f;
+            public string x;
+        }
+        public float mouseSensitivity = 100f;
 
-    public Transform playerBody;
-
-
-    GameManager gameManager;
-
-    float xRotation = 0f;
-
-    bool focus = false;
+        public Transform playerBody;
 
 
-    float lastRotPush = 0f;
+        GameManager gameManager;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        var game = GameObject.Find("Game");
-        gameManager = game.GetComponent<GameManager>();
+        float xRotation = 0f;
+
+        bool focus = false;
+
+
+        float lastRotPush = 0f;
+
+        // Start is called before the first frame update
+        void Start()
+        {
+            var game = GameObject.Find("Game");
+            gameManager = game.GetComponent<GameManager>();
 
         
         
-    }
+        }
 
-    void OnApplicationFocus(bool focused)
-    {
-        // if (gameManager.state == GameState.InGame)
+        void OnApplicationFocus(bool focused)
         {
-             // focus = focused;
-        } 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-        if (gameManager.state == GameState.InGame)
-        {
-
-            Cursor.lockState = CursorLockMode.Locked;
-            
-            if(Cursor.lockState == CursorLockMode.Locked)
+            // if (gameManager.state == GameState.InGame)
             {
-                float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-                float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+                // focus = focused;
+            } 
+        }
 
-                xRotation -= mouseY;
-                xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        // Update is called once per frame
+        void Update()
+        {
 
-                transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-                playerBody.Rotate(Vector3.up * mouseX);
-                var veccy =  playerBody.transform.rotation.eulerAngles;
+            if (gameManager.state == GameState.InGame)
+            {
+
+                Cursor.lockState = CursorLockMode.Locked;
+            
+                if(Cursor.lockState == CursorLockMode.Locked)
+                {
+                    float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+                    float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+
+                    xRotation -= mouseY;
+                    xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+                    transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+                    playerBody.Rotate(Vector3.up * mouseX);
+                    var veccy =  playerBody.transform.rotation.eulerAngles;
 
 
                     lastRotPush = xRotation;
@@ -74,9 +73,9 @@ public class MouseLook : MonoBehaviour
                         //z = veccy.z.ToString(CultureInfo.InvariantCulture)
                     };
                     
+                    WebSocketConnection.Instance.SendMessage(msg);
 
-                    gameManager.EmitMessage(msg);
-
+                }
             }
         }
     }

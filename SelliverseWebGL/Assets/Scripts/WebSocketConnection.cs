@@ -1,75 +1,99 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Text;
+using System.Threading.Tasks;
 using NativeWebSocket;
+using UnityEngine;
 
-public class WebSocketConnection : MonoBehaviour
+namespace Assets.Scripts
 {
-    WebSocket websocket;
-
-    bool isOpen = false;
-
-    // Start is called before the first frame update
-    public async void Start()
+    public class WebSocketConnection
     {
-        websocket = new WebSocket("ws://localhost:5000");
+        WebSocket websocket;
+        private Task websocketConnection;
+        private bool isClosing;
 
-        websocket.OnOpen += () =>
+        private string uri;
+        public static WebSocketConnection Instance { get; } = new WebSocketConnection();
+
+        private readonly List<Action<RootMessage, string>> MessageSubscriber = new List<Action<RootMessage, string>>();
+
+        private bool IsConnected => websocket?.State == WebSocketState.Open;
+    
+        public void Init(bool useLocal)
         {
-            Debug.Log("Connection open!");
-            isOpen = true;
-        };
+            if (websocketConnection != null)
+            {
+                throw new InvalidOperationException();
+            }
 
-        websocket.OnError += (e) =>
+            this.uri = useLocal ? "wss://localhost:5001" : "wss://selliverse.azurewebsites.net/";
+            Debug.Log("connecting to " + uri);
+        
+            var tmpWebsocket = CreateWebsocket();
+            websocket = tmpWebsocket;
+            websocketConnection = tmpWebsocket.Connect();
+        }
+
+        private WebSocket CreateWebsocket()
         {
-            Debug.Log("Error! " + e);
-            
-        };
+            var tmpWebsocket = new WebSocket(uri);
 
-        websocket.OnClose += (e) =>
+            tmpWebsocket.OnOpen += () => Debug.Log("Connection open!");
+            tmpWebsocket.OnError += (e) => Debug.Log("Error! " + e);
+            tmpWebsocket.OnClose += (e) => ForceReconnect();
+
+            tmpWebsocket.OnMessage += OnMessageReceived;
+            return tmpWebsocket;
+        }
+
+        private void ForceReconnect()
         {
-            Debug.Log("Connection closed!");
-            isOpen = false ;
-        };
+            if (isClosing) return;
 
-        // websocket.OnMessage += (bytes) =>
-        // {
-        //     Debug.Log("Hello got something");
-        //     // Reading a plain text message
-        //     var message = System.Text.Encoding.UTF8.GetString(bytes);
-        //     Debug.Log("Received OnMessage! (" + bytes.Length + " bytes) " + message);
-        // };
+            var tmpWebsocket = CreateWebsocket();
+            websocket = tmpWebsocket;
+            websocketConnection = tmpWebsocket.Connect();
+        }
 
+        public void AddMessageSubscriber(Action<RootMessage, string> subscription)
+        {
+            MessageSubscriber.Add(subscription);
+        }
 
-        await websocket.Connect();
+        private void OnMessageReceived(byte[] data)
+        {
+            var json = Encoding.UTF8.GetString(data);
+            Debug.Log($"OnMessageReceived {json}");
+            var rootMsg = JsonUtility.FromJson<RootMessage>(json);
+            foreach (var subscriber in MessageSubscriber)
+            {
+                subscriber(rootMsg, json);
+            }
+        }
 
+        public async void SendMessage(object msg)
+        {
+            if (!IsConnected) return;
+            Debug.Log($"SendMessage {JsonUtility.ToJson(msg)}");
+            await websocket.SendText(JsonUtility.ToJson(msg));
+        }
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
+        // Update is called once per frame
+        public void Update()
+        {
 #if !UNITY_WEBGL || UNITY_EDITOR
-        websocket.DispatchMessageQueue();
+            websocket?.DispatchMessageQueue();
 #endif
-    }
+        }
 
-    public void AddHandler(WebSocketMessageEventHandler handler)
-    {
-        websocket.OnMessage += handler;
-        Debug.Log("Added handler!");
-    }
-
-    async void OnApplicationQuit()
-    {
-        await websocket.Close();
-    }
-
-    public async void Send(string msg)
-    {
-        if (isOpen)
+        public async void OnApplicationQuit()
         {
-            await websocket.SendText(msg);
+            isClosing = true;
+            if (!IsConnected) return;
+            await websocket.Close();
+            websocket = null;
+            websocketConnection = null;
         }
     }
 }

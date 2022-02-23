@@ -1,36 +1,37 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
-public class LobbyController : MonoBehaviour
+namespace Assets.Scripts
 {
-    GameManager gameManager;
-
-    EventSystem eventSystem;
-
-    InputField loginInputField;
-
-    // Start is called before the first frame update
-    void Start()
+    public class LobbyController : MonoBehaviour
     {
-        gameManager = GameObject.Find("Game").GetComponent<GameManager>();
-        eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
+        GameManager gameManager;
 
-        loginInputField = GameObject.Find("NameField").GetComponent<InputField>();
+        EventSystem eventSystem;
 
-        eventSystem.SetSelectedGameObject(loginInputField.gameObject);
-    }
+        InputField loginInputField;
 
-    // Update is called once per frame
-    void Update()
-    {
-        if(gameManager.state == GameState.Lobby)
+        // Start is called before the first frame update
+        void Start()
         {
-            if (Input.GetKeyDown(KeyCode.Return))
+            gameManager = GameObject.Find("Game").GetComponent<GameManager>();
+            eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
+
+            loginInputField = GameObject.Find("NameField").GetComponent<InputField>();
+
+            eventSystem.SetSelectedGameObject(loginInputField.gameObject);
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+            if(gameManager.state == GameState.Lobby)
             {
-                gameManager.Join();
+                if (Input.GetKeyDown(KeyCode.Return))
+                {
+                    gameManager.Join();
+                }
             }
         }
     }
