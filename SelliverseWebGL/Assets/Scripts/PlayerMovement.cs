@@ -63,7 +63,7 @@ namespace Assets.Scripts
         }
 
         // Update is called once per frame
-        async void Update()
+        void Update()
         {
             var oldPosition = controller.transform.position;
 

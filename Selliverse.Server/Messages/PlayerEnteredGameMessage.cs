@@ -2,7 +2,7 @@
 {
     public class PlayerEnteredGameMessage
     {
-        public string Type { get; set; } = "entered";
+        public string Type { get; set; } = "enter";
 
         public string Id { get; set; }
 

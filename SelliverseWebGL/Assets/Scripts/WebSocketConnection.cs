@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NativeWebSocket;
@@ -10,66 +11,91 @@ namespace Assets.Scripts
     public class WebSocketConnection
     {
         WebSocket websocket;
-        private Task websocketConnection;
         private bool isClosing;
 
         private string uri;
-        public static WebSocketConnection Instance { get; } = new WebSocketConnection();
 
-        private readonly List<Action<RootMessage, string>> MessageSubscriber = new List<Action<RootMessage, string>>();
+        private static readonly Lazy<WebSocketConnection> LazyInstance =
+            new Lazy<WebSocketConnection>(() => new WebSocketConnection());
+
+        public static WebSocketConnection Instance => LazyInstance.Value;
+        
+        private Action<RootMessage> messageHandler;
 
         private bool IsConnected => websocket?.State == WebSocketState.Open;
     
-        public void Init(bool useLocal)
+        public async Task Connect(bool useLocal, Action<RootMessage> newMessageHandler)
         {
-            if (websocketConnection != null)
-            {
-                throw new InvalidOperationException();
-            }
-
+            this.messageHandler = newMessageHandler;
             this.uri = useLocal ? "wss://localhost:5001" : "wss://selliverse.azurewebsites.net/";
             Debug.Log("connecting to " + uri);
         
-            var tmpWebsocket = CreateWebsocket();
-            websocket = tmpWebsocket;
-            websocketConnection = tmpWebsocket.Connect();
+            websocket = CreateWebsocket();
+            
+            var backoff = new ExponentialBackoff(200, 2000);
+
+            while (!isClosing)
+            {
+                if (backoff.Retries > 10)
+                {
+                    backoff.Reset();
+                }
+
+                try
+                {
+                    await websocket.Connect();
+                }
+                catch(Exception exn)
+                {
+                    Debug.Log("Connection failed : " + exn.Message);
+                }
+
+                if (isClosing) continue;
+                Debug.Log($"Retrying to Connect in {backoff.GetNextDelay()} msec.");
+                await backoff.Delay();
+                if (isClosing) continue;
+                Debug.Log($"Retrying to Connect");
+            }
         }
 
         private WebSocket CreateWebsocket()
         {
             var tmpWebsocket = new WebSocket(uri);
 
-            tmpWebsocket.OnOpen += () => Debug.Log("Connection open!");
-            tmpWebsocket.OnError += (e) => Debug.Log("Error! " + e);
-            tmpWebsocket.OnClose += (e) => ForceReconnect();
-
+            tmpWebsocket.OnOpen += () => OnMessageReceived(new ConnectionStateMessage(true));
+            tmpWebsocket.OnError += (e) => Debug.Log("WebSocket Error! " + e);
+            tmpWebsocket.OnClose += (e) => OnMessageReceived(new ConnectionStateMessage(false));
             tmpWebsocket.OnMessage += OnMessageReceived;
             return tmpWebsocket;
         }
 
-        private void ForceReconnect()
-        {
-            if (isClosing) return;
-
-            var tmpWebsocket = CreateWebsocket();
-            websocket = tmpWebsocket;
-            websocketConnection = tmpWebsocket.Connect();
-        }
-
-        public void AddMessageSubscriber(Action<RootMessage, string> subscription)
-        {
-            MessageSubscriber.Add(subscription);
-        }
-
+        private static readonly Dictionary<string, Type> MessageTypeToNetTypeMappings = typeof(RootMessage).Assembly.GetTypes().Where(typeof(RootMessage).IsAssignableFrom)
+            .Where(t => t != typeof(RootMessage))
+            .Select(Activator.CreateInstance)
+            .Cast<RootMessage>()
+            .ToDictionary(msg => msg.type, msg => msg.GetType());
+        
         private void OnMessageReceived(byte[] data)
         {
             var json = Encoding.UTF8.GetString(data);
+
             Debug.Log($"OnMessageReceived {json}");
             var rootMsg = JsonUtility.FromJson<RootMessage>(json);
-            foreach (var subscriber in MessageSubscriber)
+
+            if (MessageTypeToNetTypeMappings.TryGetValue(rootMsg.type, out var msgConcreteType))
             {
-                subscriber(rootMsg, json);
+                var concreteMessage = (RootMessage) JsonUtility.FromJson(json, msgConcreteType);
+                OnMessageReceived(concreteMessage);
             }
+            else
+            {
+                Debug.Log($"Message type unknown {rootMsg.type}");
+            }
+        }
+
+        private void OnMessageReceived(RootMessage message)
+        {
+            messageHandler?.Invoke(message);
         }
 
         public async void SendMessage(object msg)
@@ -93,7 +119,6 @@ namespace Assets.Scripts
             if (!IsConnected) return;
             await websocket.Close();
             websocket = null;
-            websocketConnection = null;
         }
     }
 }

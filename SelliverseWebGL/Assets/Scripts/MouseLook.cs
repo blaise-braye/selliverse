@@ -24,6 +24,7 @@ namespace Assets.Scripts
 
 
         float lastRotPush = 0f;
+        private RotationMessage lastMsg;
 
         // Start is called before the first frame update
         void Start()
@@ -72,9 +73,12 @@ namespace Assets.Scripts
                         // y = veccy.y.ToString(CultureInfo.InvariantCulture),
                         //z = veccy.z.ToString(CultureInfo.InvariantCulture)
                     };
-                    
-                    WebSocketConnection.Instance.SendMessage(msg);
 
+                    if (msg.x != lastMsg?.x)
+                    {
+                        lastMsg = msg;
+                        WebSocketConnection.Instance.SendMessage(msg);
+                    }
                 }
             }
         }

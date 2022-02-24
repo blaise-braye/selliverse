@@ -12,26 +12,31 @@ namespace Assets.Scripts
         public GameState state;
         
         InputField nameField;
+        
+
+        private string lastWelcomedName;
 
         Dictionary<string, GameObject> players;
 
         GameObject selliFab;
         public ChatController chatController;
         PlayerMovement playerMovement;
+        private GameObject lobby;
+        private Text connectionLostStateText;
 
         // Start is called before the first frame update
-        void Start()
+        async void Start()
         {
             this.state = GameState.Lobby;
             nameField = GameObject.Find("NameField").GetComponent<InputField>();
+            connectionLostStateText = GameObject.Find("ConnectionStateText").GetComponent<Text>();
             playerMovement = GameObject.Find("Player").GetComponent<PlayerMovement>();
             chatController = GameObject.Find("HUD").GetComponent<ChatController>();
             selliFab = GameObject.Find("SelliFab");
+            lobby = GameObject.Find("Lobby");
             players = new Dictionary<string, GameObject>();
             
-            WebSocketConnection.Instance.Init(this.UseLocal);
-            WebSocketConnection.Instance.AddMessageSubscriber(HandleMessage);
-
+            await WebSocketConnection.Instance.Connect(this.UseLocal, HandleMessage);
         }
         
         // Update is called once per frame
@@ -58,48 +63,65 @@ namespace Assets.Scripts
             WebSocketConnection.Instance.SendMessage(enterMsg);
         }
         
-        private void HandleMessage(RootMessage rootMessage, string json)
+        private void HandleMessage(RootMessage rootMessage)
         {
-            switch (rootMessage.type)
+            switch (rootMessage)
             {
-                case "welcome":
-                    HandleWelcome(json);
+                case ConnectionStateMessage msg:
+                    HandleConnectionState(msg);
                     break;
-                case "chat":
-                    HandleChat(json);
+                case WelcomeMessage msg:
+                    HandleWelcome(msg);
                     break;
-                case "movement":
-                    HandleMovement(json);
+                case ChatMessage msg:
+                    HandleChat(msg);
                     break;
-                case "entered":
-                    HandleEntered(json);
+                case MovementMessage msg:
+                    HandleMovement(msg);
                     break;
-                case "rotation":
-                    HandleRotation(json);
+                case EnterMessage msg:
+                    HandleEntered(msg);
                     break;
-                case "left":
-                    HandleLeft(json);
+                case RotationMessage msg:
+                    HandleRotation(msg);
                     break;
-                case "move":
-                    HandleMove(json);
+                case LeftMessage msg:
+                    HandleLeft(msg);
+                    break;
+                case MoveMessage msg:
+                    HandleMove(msg);
                     break;
                 default:
-                    Debug.Log("Got a '" + rootMessage.type + "' from the server : " + json);
+                    Debug.Log("Got a '" + rootMessage.type + "' from the server");
                     break;
             }
         }
-
-
-        public void HandleWelcome(string json)
+        
+        private void HandleConnectionState(ConnectionStateMessage msg)
         {
-            var welcomeMsg = JsonUtility.FromJson<WelcomeMessage>(json);
+            if (msg.IsConnected)
+            {
+                connectionLostStateText.text = "";
+                if (!string.IsNullOrEmpty(lastWelcomedName))
+                {
+                    Join();
+                }
+            }
+            else
+            {
+                connectionLostStateText.color = Color.red;
+                connectionLostStateText.text = "Disconnected";
+            }
+        }
 
-            var lobby = GameObject.Find("Lobby");
+        public void HandleWelcome(WelcomeMessage welcomeMsg)
+        {
             if (welcomeMsg.isWelcome)
             {
                 this.state = GameState.InGame;
                 Debug.Log("Welcome to the game!");
                 lobby.SetActive(false);
+                lastWelcomedName = nameField.text;
             }
             else
             {
@@ -109,10 +131,8 @@ namespace Assets.Scripts
             }
         }
 
-        public void HandleLeft(string json)
+        public void HandleLeft(LeftMessage leftMsg)
         {
-            var leftMsg = JsonUtility.FromJson<LeftMessage>(json);
-
             if (this.players.TryGetValue(leftMsg.id, out GameObject go))
             {
                 this.players.Remove(leftMsg.id);
@@ -120,10 +140,8 @@ namespace Assets.Scripts
             }
         }
 
-        public void HandleMovement(string json)
+        public void HandleMovement(MovementMessage moveMsg)
         {
-            var moveMsg = JsonUtility.FromJson<MovementMessage>(json);
-
             if (this.players.TryGetValue(moveMsg.id, out GameObject go))
             {
                 var location = new Vector3(
@@ -135,11 +153,9 @@ namespace Assets.Scripts
                 go.transform.position = location;
             }
         }
-
-
-        public void HandleRotation(string json)
+        
+        public void HandleRotation(RotationMessage rotMsg)
         {
-            var rotMsg = JsonUtility.FromJson<RotationMessage>(json);
             if (this.players.TryGetValue(rotMsg.id, out GameObject go))
             {
                 go.gameObject.transform.rotation =
@@ -150,30 +166,22 @@ namespace Assets.Scripts
                 // go.gameObject.transform.Rotate(Vector3.up * ((float.Parse(rotMsg.x, CultureInfo.InvariantCulture) + (Mathf.PI / 4.0f)) ));
             }
         }
-
-
-        public void HandleEntered(string json)
+        
+        public void HandleEntered(EnterMessage enterMsg)
         {
-            Debug.Log("Someone entered " + json);
-            var enterMsg = JsonUtility.FromJson<EnterMessage>(json);
-
             GameObject childGameObject = Instantiate(selliFab, new Vector3(-55f, 5f, -50f), Quaternion.identity);
             var text = childGameObject.GetComponentInChildren<TextMesh>();
             text.text = enterMsg.name;
             this.players.Add(enterMsg.id, childGameObject);
         }
 
-        public void HandleChat(string json)
+        public void HandleChat(ChatMessage chatMsg)
         {
-            var chatMsg = JsonUtility.FromJson<ChatMessage>(json);
-
             chatController.AddChat(chatMsg.name, chatMsg.content);
         }
 
-        public void HandleMove(string json)
+        public void HandleMove(MoveMessage chatMsg)
         {
-            var chatMsg = JsonUtility.FromJson<MoveMessage>(json);
-
             var location = new Vector3(
                 float.Parse(chatMsg.x, CultureInfo.InvariantCulture),
                 float.Parse(chatMsg.y, CultureInfo.InvariantCulture),
@@ -181,8 +189,6 @@ namespace Assets.Scripts
             );
 
             playerMovement.Teleport(location);
-
-            Debug.Log("Move Command " + json);
         }
 
     }

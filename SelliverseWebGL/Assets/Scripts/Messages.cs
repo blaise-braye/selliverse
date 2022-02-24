@@ -12,6 +12,21 @@ namespace Assets.Scripts
         public string type;
     }
 
+    public class ConnectionStateMessage : RootMessage
+    {
+        public ConnectionStateMessage()
+        {
+            type = "socket-state";
+        }
+
+        public ConnectionStateMessage(bool isConnected) : this()
+        {
+            IsConnected = isConnected;
+        }
+
+        public bool IsConnected { get; set; }
+    }
+
     public class WelcomeMessage : RootMessage
     {
         public WelcomeMessage()
@@ -26,7 +41,7 @@ namespace Assets.Scripts
     {
         public EnterMessage()
         {
-            type = "entered";
+            type = "enter";
         }
 
         public string name;

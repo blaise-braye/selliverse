@@ -59,10 +59,12 @@
     <Compile Include="Assets\OccaSoftware\Enflame\Scripts\OscillateLightBrightness.cs" />
     <Compile Include="Assets\Scripts\PlayerMovement.cs" />
     <Compile Include="Assets\Scripts\HideByDefault.cs" />
+    <Compile Include="Assets\Scripts\ExponentialBackoff.cs" />
     <Compile Include="Assets\OccaSoftware\Enflame\Scripts\VolumetricFire.cs" />
     <Compile Include="Assets\LowPolyWater_Pack\Scripts\LowPolyWater.cs" />
     <Compile Include="Assets\Scripts\ChatController.cs" />
     <Compile Include="Assets\Scripts\MouseLook.cs" />
+    <Compile Include="Assets\Scripts\Messages.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\WebSocket.cs" />
     <Compile Include="Assets\Scripts\Regional.cs" />
@@ -70,7 +72,6 @@
     <Compile Include="Assets\Scripts\LobbyController.cs" />
     <Compile Include="Assets\Scripts\LookAtCamera.cs" />
     <Compile Include="Assets\Scripts\WebSocketConnection.cs" />
-    <Compile Include="Assets\Scripts\Messages.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\BOXOPHOBIC\Skybox Cubemap Extended\Core\Shaders\Skybox Cubemap Extended.shader" />
