@@ -1,21 +1,25 @@
 ﻿using Akka.Actor;
-using Selliverse.Server.Actors;
 using Selliverse.Server.Messages;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.Net;
 using System.Net.WebSockets;
 using System.Text.Json;
+using Microsoft.ApplicationInsights;
 
 namespace Selliverse.Server
 {
     public class SocketTranslator
     {
+        private readonly TelemetryClient _telemetryClient;
         private IActorRef CoreActor { get; }
 
-        public SocketTranslator(IActorRef coreActor)
+        public SocketTranslator(TelemetryClient telemetryClient, IActorRef coreActor)
         {
+            _telemetryClient = telemetryClient;
             CoreActor = coreActor;
         }
 
@@ -35,12 +39,20 @@ namespace Selliverse.Server
             var payload = JsonSerializer.Deserialize<Dictionary<string, string>>(message);
             // Log.Warning("MSG OF TYPE {type}", payload["type"]);
             // ChatMessage cm = dynob as ChatMessage;
-
+            var sw = Stopwatch.StartNew();
             var msg = CreateStronglyTypedMessage(payload, id);
             if (msg != null)
             {
                 this.CoreActor.Tell(msg);
             }
+
+            var now = DateTimeOffset.UtcNow;
+            sw.Stop();
+
+            var success = msg != null;
+            var code = success ? "200" : "400";
+
+            _telemetryClient.TrackRequest($"OnMessage/{msg?.Type ?? "UNKNOWN"}", now, sw.Elapsed, code, success);
         }
 
         public void OnDisconnected(string id)
@@ -52,7 +64,7 @@ namespace Selliverse.Server
             });
         }
 
-        private Object CreateStronglyTypedMessage(Dictionary<string, string> input, String id)
+        private IMessage CreateStronglyTypedMessage(Dictionary<string, string> input, String id)
         {
             switch (input["type"])
             {

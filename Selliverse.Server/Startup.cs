@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Net.Http.Headers;
 using Selliverse.Server.Actors;
+using Microsoft.Extensions.Configuration;
 
 namespace Selliverse.Server
 {
@@ -16,6 +17,11 @@ namespace Selliverse.Server
 
     public class Startup
     {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+        public IConfiguration Configuration { get; }
         public void ConfigureServices(IServiceCollection services)
         {
             var system = ActorSystem.Create("selliverse");
@@ -32,7 +38,9 @@ namespace Selliverse.Server
             {
                 options.Providers.Add<GzipCompressionProvider>();
             });
+            
             services.AddMvc(options => options.EnableEndpointRouting = false);
+            services.AddApplicationInsightsTelemetry(Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment whe)

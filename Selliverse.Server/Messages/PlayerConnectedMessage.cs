@@ -2,9 +2,11 @@
 {
     using System.Net.WebSockets;
 
-    public class PlayerConnectedMessage
+    public class PlayerConnectedMessage : IMessage
     {
         public string Id { get; set; }
+
+        public string Type { get; set; } = "connected";
 
         public string Name { get; set; }
 

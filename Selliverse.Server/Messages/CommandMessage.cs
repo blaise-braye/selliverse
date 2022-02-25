@@ -1,6 +1,6 @@
 ﻿namespace Selliverse.Server.Messages
 {
-    public class CommandMessage
+    public class CommandMessage : IMessage
     {
         public string Id { get; set; }
 

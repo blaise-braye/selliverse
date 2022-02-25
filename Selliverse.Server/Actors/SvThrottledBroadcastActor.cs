@@ -13,7 +13,7 @@
     using System.Threading;
     using System.Threading.Tasks;
 
-    public class MovementToGameMessage
+    public class MovementToGameMessage : IMessage
     {
         public String Type { get; set; } = "movement";
 
@@ -38,7 +38,7 @@
 
     public class SvThrottledBroadcastActor : ReceiveActor
     {
-        private Dictionary<string, ThrottledPosition> latestPlayerPositions = new Dictionary<string, ThrottledPosition>();
+        private readonly Dictionary<string, ThrottledPosition> _latestPlayerPositions = new Dictionary<string, ThrottledPosition>();
 
         private readonly IActorRef _daddy;
 
@@ -53,25 +53,25 @@
 
         private async Task HandleSendThrottledPositionsMessage(SendThrottledPositionsMessage throttled)
         {
-            foreach (var pair in this.latestPlayerPositions.Where(lp => lp.Value.HasUpdated))
+            foreach (var pair in this._latestPlayerPositions.Where(lp => lp.Value.HasUpdated))
             {
                 var msg = MovementToGameMessage.FromPos(pair.Key, pair.Value);
 
                 this._daddy.Tell(msg);
             }
 
-            this.latestPlayerPositions.Clear();
+            this._latestPlayerPositions.Clear();
         }
      
         private void HandleMovement(MovementMessage msg)
         {
-            if (this.latestPlayerPositions.TryGetValue(msg.Id, out var throttledPosition))
+            if (this._latestPlayerPositions.TryGetValue(msg.Id, out var throttledPosition))
             {
-                this.latestPlayerPositions[msg.Id] = ThrottledPosition.Update(throttledPosition, msg.Position);
+                this._latestPlayerPositions[msg.Id] = ThrottledPosition.Update(throttledPosition, msg.Position);
             }
             else
             {
-                this.latestPlayerPositions[msg.Id] = new ThrottledPosition()
+                this._latestPlayerPositions[msg.Id] = new ThrottledPosition()
                 {
                     Position = msg.Position,
                     HasUpdated = true //first position needs an update

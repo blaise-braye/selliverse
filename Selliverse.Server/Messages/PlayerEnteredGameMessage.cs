@@ -1,6 +1,6 @@
 ﻿namespace Selliverse.Server.Messages
 {
-    public class PlayerEnteredGameMessage
+    public class PlayerEnteredGameMessage : IMessage
     {
         public string Type { get; set; } = "enter";
 

@@ -1,6 +1,6 @@
 ﻿namespace Selliverse.Server.Messages
 {
-    public class RotationMessage
+    public class RotationMessage : IMessage
     {
         public string Type { get; set; } = "rotation";
 

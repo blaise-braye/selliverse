@@ -1,4 +1,8 @@
-﻿namespace Selliverse.Server
+﻿using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.ApplicationInsights.Extensibility.Implementation.ApplicationId;
+
+namespace Selliverse.Server
 {
     using Microsoft.AspNetCore.Http;
     using Serilog;
