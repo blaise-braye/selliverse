@@ -1,6 +1,8 @@
-﻿namespace Selliverse.Server.Messages
+﻿using System.Collections.Generic;
+
+namespace Selliverse.Server.Messages
 {
-    public class ChatMessage : IMessage
+    public class ChatMessage : IMessage, IIncomingMessageParser
     {
         public string Id { get; set; }
 
@@ -10,5 +12,10 @@
 
         public string Content { get; set; }
 
+        public IMessage Parse(Dictionary<string, string> input) =>
+            new ChatMessage()
+            {
+                Content = input["content"]
+            };
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.IO.Compression;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Net.Http.Headers;

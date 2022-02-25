@@ -1,6 +1,8 @@
-﻿namespace Selliverse.Server.Messages
+﻿using System.Collections.Generic;
+
+namespace Selliverse.Server.Messages
 {
-    public class CommandMessage : IMessage
+    public class CommandMessage : IMessage, IIncomingMessageParser
     {
         public string Id { get; set; }
 
@@ -8,5 +10,10 @@
 
         public string Content { get; set; }
 
+        public IMessage Parse(Dictionary<string, string> input) =>
+            new CommandMessage
+            {
+                Content = input["content"],
+            };
     }
 }

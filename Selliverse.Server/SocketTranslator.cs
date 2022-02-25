@@ -4,8 +4,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.Net;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text.Json;
 using Microsoft.ApplicationInsights;
@@ -14,7 +13,16 @@ namespace Selliverse.Server
 {
     public class SocketTranslator
     {
+        private static readonly Dictionary<string, IIncomingMessageParser> SupportedParsersByMsgType =
+            typeof(IIncomingMessageParser).Assembly.GetTypes()
+                .Where(t => typeof(IIncomingMessageParser).IsAssignableFrom(t))
+                .Where(t => t.IsClass && !t.IsAbstract)
+                .Select(t => (IIncomingMessageParser)Activator.CreateInstance(t))
+                .Where(p => p != null)
+                .ToDictionary(p => p.Type);
+
         private readonly TelemetryClient _telemetryClient;
+
         private IActorRef CoreActor { get; }
 
         public SocketTranslator(TelemetryClient telemetryClient, IActorRef coreActor)
@@ -37,8 +45,7 @@ namespace Selliverse.Server
         public void OnMessage(string id, string message)
         {
             var payload = JsonSerializer.Deserialize<Dictionary<string, string>>(message);
-            // Log.Warning("MSG OF TYPE {type}", payload["type"]);
-            // ChatMessage cm = dynob as ChatMessage;
+            
             var sw = Stopwatch.StartNew();
             var msg = CreateStronglyTypedMessage(payload, id);
             if (msg != null)
@@ -64,46 +71,17 @@ namespace Selliverse.Server
             });
         }
 
-        private IMessage CreateStronglyTypedMessage(Dictionary<string, string> input, String id)
+
+        private IMessage CreateStronglyTypedMessage(Dictionary<string, string> input, string id)
         {
-            switch (input["type"])
+            if (SupportedParsersByMsgType.TryGetValue(input["type"], out var parser))
             {
-                case "chat":
-                    return new ChatMessage()
-                    {
-                        Id = id,
-                        Content = input["content"]
-                    };
-                case "command":
-                    return new CommandMessage()
-                    {
-                        Id = id,
-                        Content = input["content"],
-                    };
-                case "enter":
-                    return new PlayerEnteredGameMessage()
-                    {
-                        Id = id,
-                        Name = input["name"]
-                    };
-                case "movement":
-                    return new MovementMessage()
-                    {
-                        Id = id,
-                        Position = new System.Numerics.Vector3(
-                            float.Parse(input["x"], CultureInfo.InvariantCulture), 
-                            float.Parse(input["y"], CultureInfo.InvariantCulture), 
-                            float.Parse(input["z"], CultureInfo.InvariantCulture))
-                    };
-                case "rotation":
-                    return new RotationMessage()
-                    {
-                        Id = id,
-                        X = float.Parse(input["x"], CultureInfo.InvariantCulture)
-                    };
-                default:
-                    return null;
+                var typedMessage = parser.Parse(input);
+                typedMessage.Id = id;
+                return typedMessage;
             }
+
+            return null;
         }
     }
 }

@@ -1,8 +1,4 @@
-﻿using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.DataContracts;
-using Microsoft.ApplicationInsights.Extensibility.Implementation.ApplicationId;
-
-namespace Selliverse.Server
+﻿namespace Selliverse.Server
 {
     using Microsoft.AspNetCore.Http;
     using Serilog;
@@ -42,7 +38,7 @@ namespace Selliverse.Server
             }
         }
 
-        private async Task Listen(String id, WebSocket socket)
+        private async Task Listen(string id, WebSocket socket)
         {
             var buffer = new byte[1024 * 4];
 

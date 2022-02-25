@@ -2,29 +2,24 @@
 {
     using Akka.Actor;
     using Selliverse.Server.Messages;
-    using Serilog;
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using System.Net.WebSockets;
-    using System.Numerics;
-    using System.Text.Json;
-    using System.Threading;
     using System.Threading.Tasks;
 
     public class MovementToGameMessage : IMessage
     {
-        public String Type { get; set; } = "movement";
+        public string Type { get; set; } = "movement";
 
-        public String Id { get; set; }
+        public string Id { get; set; }
 
-        public String X { get; set; }
-        public String Y { get; set; }
+        public string X { get; set; }
+        public string Y { get; set; }
 
-        public String Z { get; set; }
+        public string Z { get; set; }
 
-        public static MovementToGameMessage FromPos(String id, ThrottledPosition pos)
+        public static MovementToGameMessage FromPos(string id, ThrottledPosition pos)
         {
             return new MovementToGameMessage()
             {
