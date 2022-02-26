@@ -13,10 +13,12 @@ namespace Selliverse.Server.Actors
     public class PlayerState
     {
         public string Name { get; set; }
+        
+        public GameState GameState { get; set; }
 
         public Vector3 Position { get; set; }
 
-        public GameState GameState { get; set; }
+        public float RotationX { get; set; }
     }
 
     public class Connection

@@ -16,8 +16,7 @@ namespace Selliverse.Server
 
         public static async Task SendItRight<T>(this WebSocket webSocket, T message)
         {
-
-            var body = new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(message, new JsonSerializerOptions()
+            var body = new ArraySegment<byte>(JsonSerializer.SerializeToUtf8Bytes(message, message.GetType(), new JsonSerializerOptions()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             }));

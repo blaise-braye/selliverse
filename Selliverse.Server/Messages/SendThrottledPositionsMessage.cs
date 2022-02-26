@@ -1,5 +1,5 @@
 ﻿namespace Selliverse.Server.Messages
 {
-    public class SendThrottledPositionsMessage
+    public class SendThrottledMessage<TMessage>
     { }
 }

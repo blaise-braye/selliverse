@@ -19,12 +19,13 @@ namespace Selliverse.Server.Actors
         
         private readonly Queue<ChatMessage> _lastMessages = new();
 
-        public readonly IActorRef ThrottleActor;
+        public readonly IActorRef SvThrottledMovementActor;
+        public readonly IActorRef SvThrottledRotationActor;
 
         public SvCoreActor()
         {
-            var throttleProps = Props.Create(() => new SvThrottledBroadcastActor(Self));
-            ThrottleActor = Context.ActorOf(throttleProps, "svThrottle");
+            SvThrottledMovementActor = Context.ActorOf(Props.Create(() => new SvThrottledMessageActor<MovementMessage>(Self)), "SvThrottledMovementActor");
+            SvThrottledRotationActor = Context.ActorOf(Props.Create(() => new SvThrottledMessageActor<RotationMessage>(Self)), "SvThrottledRotationActor");
 
             this.Receive<PlayerConnectedMessage>(this.HandlePlayerConnected);
             this.ReceiveAsync<PlayerLeftMessage>(this.HandlePlayerLeft);
@@ -33,10 +34,11 @@ namespace Selliverse.Server.Actors
             this.ReceiveAsync<PlayerEnteredGameMessage>(this.HandlePlayerEnteredGame);
             this.Receive<PlayerListAsk>(this.HandlePlayerListAsk);
             this.Receive<MovementMessage>(this.HandleMovement);
-            this.ReceiveAsync<MovementToGameMessage>(this.HandleMovementToGame);
-            this.ReceiveAsync<RotationMessage>(this.HandleRotation);
+            this.Receive<RotationMessage>(this.HandleRotation);
+            this.ReceiveAsync<BroadcastToOtherMessage<MovementMessage>>(this.HandleBroadcastToOthers);
+            this.ReceiveAsync<BroadcastToOtherMessage<RotationMessage>>(this.HandleBroadcastToOthers);
         }
-
+        
         private IEnumerable<Connection> Connections => _playerConnectionsById.Values;
 
         private Connection GetSender(IMessage msg)
@@ -44,9 +46,9 @@ namespace Selliverse.Server.Actors
             return _playerConnectionsById[msg.Id];
         }
 
-        private async Task BroadCastToOthers(string id, object message)
+        private async Task BroadCastToOthers(IMessage message)
         {
-            foreach (var cn in Connections.Where(cn => !cn.Id.Equals(id, System.StringComparison.Ordinal)))
+            foreach (var cn in Connections.Where(cn => !cn.Id.Equals(message.Id, System.StringComparison.Ordinal)))
             {
                 await cn.WebSocket.SendItRight(message);
             }
@@ -82,9 +84,9 @@ namespace Selliverse.Server.Actors
             }
         }
 
-        private async Task HandleMovementToGame(MovementToGameMessage msg)
+        private async Task HandleBroadcastToOthers<TMessage>(BroadcastToOtherMessage<TMessage> envelope) where TMessage : IMessage
         {
-            await BroadCastToOthers(msg.Id, msg);
+            await BroadCastToOthers(envelope.Message);
         }
 
         private void HandlePlayerConnected(PlayerConnectedMessage msg)
@@ -105,7 +107,7 @@ namespace Selliverse.Server.Actors
         {
             Log.Information("Player {id} left", msg.Id);
             this._playerConnectionsById.Remove(msg.Id);
-            await BroadCastToOthers(msg.Id, msg);
+            await BroadCastToOthers(msg);
         }
 
         private async Task HandleCommand(CommandMessage msg)
@@ -155,11 +157,6 @@ namespace Selliverse.Server.Actors
 
         }
 
-        private async Task HandleRotation(RotationMessage msg)
-        {
-            await BroadCastToOthers(msg.Id, msg);
-        }
-
         private async Task HandlePlayerEnteredGame(PlayerEnteredGameMessage msg)
         {
             Log.Information("Getting a new player entered!");
@@ -204,9 +201,16 @@ namespace Selliverse.Server.Actors
             }
         }
 
+        private void HandleRotation(RotationMessage msg)
+        {
+            GetSender(msg).PlayerState.RotationX = msg.XFloat;
+            this.SvThrottledRotationActor.Tell(msg);
+        }
+
         private void HandleMovement(MovementMessage msg)
         {
-            this.ThrottleActor.Tell(msg);
+            GetSender(msg).PlayerState.Position = msg.Position;
+            this.SvThrottledMovementActor.Tell(msg);
         }
 
         private void HandlePlayerListAsk(PlayerListAsk ask)
