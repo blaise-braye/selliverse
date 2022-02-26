@@ -19,19 +19,19 @@ namespace Assets.Scripts
             new Lazy<WebSocketConnection>(() => new WebSocketConnection());
 
         public static WebSocketConnection Instance => LazyInstance.Value;
-        
+
         private Action<RootMessage> messageHandler;
 
         private bool IsConnected => websocket?.State == WebSocketState.Open;
-    
+
         public async Task Connect(bool useLocal, Action<RootMessage> newMessageHandler)
         {
             this.messageHandler = newMessageHandler;
             this.uri = useLocal ? "wss://localhost:5001" : "wss://selliverse.azurewebsites.net/";
             Debug.Log("connecting to " + uri);
-        
+
             websocket = CreateWebsocket();
-            
+
             var backoff = new ExponentialBackoff(200, 2000);
 
             while (!isClosing)
@@ -74,12 +74,10 @@ namespace Assets.Scripts
             .Select(Activator.CreateInstance)
             .Cast<RootMessage>()
             .ToDictionary(msg => msg.type, msg => msg.GetType());
-        
+
         private void OnMessageReceived(byte[] data)
         {
             var json = Encoding.UTF8.GetString(data);
-
-            Debug.Log($"OnMessageReceived {json}");
             var rootMsg = JsonUtility.FromJson<RootMessage>(json);
 
             if (MessageTypeToNetTypeMappings.TryGetValue(rootMsg.type, out var msgConcreteType))
@@ -101,7 +99,6 @@ namespace Assets.Scripts
         public async void SendMessage(object msg)
         {
             if (!IsConnected) return;
-            Debug.Log($"SendMessage {JsonUtility.ToJson(msg)}");
             await websocket.SendText(JsonUtility.ToJson(msg));
         }
 
