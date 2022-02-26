@@ -1,13 +1,12 @@
-﻿namespace Selliverse.Server.Actors
-{
-    using Akka.Actor;
-    using Selliverse.Server.Messages;
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using System.Threading.Tasks;
+﻿using Akka.Actor;
+using Selliverse.Server.Messages;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
+namespace Selliverse.Server.Actors
+{
     public class MovementToGameMessage : IMessage
     {
         public string Type { get; set; } = "movement";
@@ -21,7 +20,7 @@
 
         public static MovementToGameMessage FromPos(string id, ThrottledPosition pos)
         {
-            return new MovementToGameMessage()
+            return new MovementToGameMessage
             {
                 Id = id,
                 X = pos.Position.X.ToString(CultureInfo.InvariantCulture),
@@ -42,11 +41,11 @@
             this._daddy = daddyActor;
             Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.Zero, TimeSpan.FromMilliseconds(50), Self, new SendThrottledPositionsMessage(), Self);
             this.Receive<MovementMessage>(this.HandleMovement);
-            this.ReceiveAsync<SendThrottledPositionsMessage>(this.HandleSendThrottledPositionsMessage);
+            this.Receive<SendThrottledPositionsMessage>(this.HandleSendThrottledPositionsMessage);
             
         }
 
-        private async Task HandleSendThrottledPositionsMessage(SendThrottledPositionsMessage throttled)
+        private void HandleSendThrottledPositionsMessage(SendThrottledPositionsMessage throttled)
         {
             foreach (var pair in this._latestPlayerPositions.Where(lp => lp.Value.HasUpdated))
             {
@@ -66,7 +65,7 @@
             }
             else
             {
-                this._latestPlayerPositions[msg.Id] = new ThrottledPosition()
+                this._latestPlayerPositions[msg.Id] = new ThrottledPosition
                 {
                     Position = msg.Position,
                     HasUpdated = true //first position needs an update

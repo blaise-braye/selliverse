@@ -1,12 +1,12 @@
-﻿namespace Selliverse.Server
+﻿using Microsoft.AspNetCore.Http;
+using Serilog;
+using System;
+using System.Net.WebSockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+namespace Selliverse.Server
 {
-    using Microsoft.AspNetCore.Http;
-    using Serilog;
-    using System;
-    using System.Net.WebSockets;
-    using System.Text;
-    using System.Threading;
-    using System.Threading.Tasks;
     public class SocketMiddleware
     {
         private readonly RequestDelegate next;

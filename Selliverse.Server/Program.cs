@@ -1,12 +1,11 @@
-﻿namespace Selliverse.Server
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Serilog;
+using Serilog.Events;
+using System.Threading.Tasks;
+
+namespace Selliverse.Server
 {
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Hosting;
-    using Serilog;
-    using Serilog.Events;
-    using System.Threading.Tasks;
-
-
     public static class Program
     {
         public static async Task Main(string[] args)

@@ -1,7 +1,7 @@
-﻿namespace Selliverse.Server.Messages
-{
-    using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 
+namespace Selliverse.Server.Messages
+{
     public class PlayerConnectedMessage : IMessage
     {
         public string Id { get; set; }

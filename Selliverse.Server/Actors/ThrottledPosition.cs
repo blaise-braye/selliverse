@@ -1,9 +1,12 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 
 namespace Selliverse.Server
 {
     public class ThrottledPosition
     {
+        private static readonly double epsilon = .00001;
+
         public Vector3 Position { get; set; }
 
         public bool HasUpdated { get; set; }
@@ -11,11 +14,11 @@ namespace Selliverse.Server
 
         public static ThrottledPosition Update(ThrottledPosition lastPosition, Vector3 newPosition)
         {
-            if (newPosition.X == lastPosition.Position.X &&
-                newPosition.Y == lastPosition.Position.Y &&
-                newPosition.Z == lastPosition.Position.Z)
+            if (Math.Abs(newPosition.X - lastPosition.Position.X) < epsilon &&
+                Math.Abs(newPosition.Y - lastPosition.Position.Y) < epsilon &&
+                Math.Abs(newPosition.Z - lastPosition.Position.Z) < epsilon)
             {
-                return new ThrottledPosition()
+                return new ThrottledPosition
                 {
                     Position = newPosition,
                     HasUpdated = false
@@ -23,7 +26,7 @@ namespace Selliverse.Server
             }
             else
             {
-                return new ThrottledPosition()
+                return new ThrottledPosition
                 {
                     Position = newPosition,
                     HasUpdated = true

@@ -1,17 +1,16 @@
-﻿using Selliverse.Server.MessagesAsks;
+﻿using Akka.Actor;
+using Selliverse.Server.MessagesAsks;
+using Selliverse.Server.Messages;
+using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Numerics;
+using System.Threading.Tasks;
 
 namespace Selliverse.Server.Actors
 {
-    using Akka.Actor;
-    using Selliverse.Server.Messages;
-    using Serilog;
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using System.Numerics;
-    using System.Threading.Tasks;
-
     public class SvCoreActor : ReceiveActor
     {
         public const int ChatDistance = 1000;
